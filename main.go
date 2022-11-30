@@ -213,7 +213,7 @@ type Read_Pi_content struct {
 }
 
 func main() {
-	f, err := excelize.OpenFile("piModle")
+	f, err := excelize.OpenFile("piModle.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -246,6 +246,16 @@ func main() {
 	f.SetCellValue("PI", "I7", readPiContent.Body.Pi.ContractID)
 	f.SetCellValue("PI", "C14", readPiContent.Body.Pi.Description)
 	f.SetCellValue("PI", "I9", readPiContent.Body.Pi.OrdDate)
+
+	//判斷C7是不是PROMETAL
+	cell, err := f.GetCellValue("PI", "C7")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	if cell != "PROMETAL INTERNATIONAL CO., LTD" {
+		f.SetCellValue("PI", "C7", "MEGLOBE CO., LTD")
+	}
 
 	//Pi第一個表格
 	var countPi int = len(readPiContent.Body.Pi.PiItems)
@@ -304,7 +314,7 @@ func main() {
 
 	//存檔
 
-	if err := f.SaveAs("piForHo222222企業"); err != nil {
+	if err := f.SaveAs("piForHo222222企業.xlsx"); err != nil {
 		fmt.Println(err)
 	}
 
