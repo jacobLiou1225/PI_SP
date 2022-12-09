@@ -252,6 +252,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println(cell)
 
 	//Pi開頭的基本資料:
 	f.SetCellValue("PI", "C9", readPiContent.Body.Pi.Customer.Name)
@@ -446,12 +447,7 @@ func main() {
 	theInertTermsRowNumber := howManyTermsNewLine - 2
 	termsIsMoreThan1 := theInertTermsRowNumber > 0
 
-	termsString := readPiContent.Body.Pi.Terms
-	termsStringSplit := strings.Split(termsString, "\n")
-	howManySplitLine := len(termsStringSplit)
-	fmt.Println(termsStringSplit[2])
-	fmt.Println("分開了這麼多行:+", howManySplitLine)
-
+	//插入新的row，因為原版位置不夠
 	if termsIsMoreThan1 == true {
 		if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
 			for i := 0; i < theInertTermsRowNumber; i++ {
