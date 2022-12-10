@@ -214,6 +214,10 @@ type Read_Pi_content struct {
 	} `json:"body"`
 }
 
+func countStringLine(i string) float64 {
+	return math.Ceil(float64((len(i) / 128)))
+}
+
 func main() {
 	f, err := excelize.OpenFile("piModle.xlsx")
 	if err != nil {
@@ -446,11 +450,29 @@ func main() {
 	howManyTermsNewLine := strings.Count(readPiContent.Body.Pi.Terms, "\n") + 1
 	theInertTermsRowNumber := howManyTermsNewLine - 2
 	//因為行數不夠 要插入的行數
-	theInertStringOfTerms := math.Ceil(float64(len(readPiContent.Body.Pi.Terms)/128)) - float64(howManyTermsNewLine)
-	fmt.Println("總長度", len(readPiContent.Body.Pi.Terms))
 	str := readPiContent.Body.Pi.Terms
 	str1 := strings.Split(str, "\n")
 	a := len(str1)
+	var termsNewLineArray [20]float64
+	for i := 0; i < a; i++ {
+		termsNewLineArray[i] = countStringLine(str1[i])
+		fmt.Println("總長度", termsNewLineArray[i])
+	}
+	var apple int = 48
+	k, _ := excelize.CoordinatesToCellName(1, 1)
+	for i := 0; i < a; i++ {
+		for j := 0.0; j < termsNewLineArray[i]; j++ {
+			f.InsertRow("PI", apple)
+			apple = int(float64(apple) + j)
+			k, _ = excelize.CoordinatesToCellName(1, apple)
+		}
+		l, _ := excelize.CoordinatesToCellName(1, apple-int(termsNewLineArray[i]))
+		f.SetCellValue("PI", l, termsNewLineArray[i])
+		f.MergeCell("PI", l, k)
+		f.InsertRow("PI", apple+1)
+		apple += 2
+	}
+
 	termsIsMoreThan1 := theInertTermsRowNumber > 0
 
 	//插入新的row，因為原版位置不夠
