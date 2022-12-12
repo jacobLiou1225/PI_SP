@@ -215,7 +215,7 @@ type Read_Pi_content struct {
 }
 
 func countStringLine(i string) float64 {
-	return math.Ceil(float64((len(i) / 128)))
+	return (math.Ceil((float64(len(i)) / 128)))
 }
 
 func main() {
@@ -252,7 +252,7 @@ func main() {
 	} else {
 		f.SetCellValue("PI", "C7", "MEGLOBE CO., LTD")
 	}
-	cell, err := f.GetCellValue("PI", "C7")
+	//cell, err := f.GetCellValue("PI", "C7")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -447,55 +447,10 @@ func main() {
 	f.SetCellValue("PI", BeneficiaryName[4], readPiContent.Body.Pi.Customer.BeneficiaryInfo.Address)
 
 	//terms部分 要用到/n
-	howManyTermsNewLine := strings.Count(readPiContent.Body.Pi.Terms, "\n") + 1
-	theInertTermsRowNumber := howManyTermsNewLine - 2
+	//howManyTermsNewLine := strings.Count(readPiContent.Body.Pi.Terms, "\n") + 1
+	//theInertTermsRowNumber := howManyTermsNewLine - 2
 	//因為行數不夠 要插入的行數
-	str := readPiContent.Body.Pi.Terms
-	str1 := strings.Split(str, "\n")
-	a := len(str1)
-	var termsNewLineArray [20]float64
-	for i := 0; i < a; i++ {
-		termsNewLineArray[i] = countStringLine(str1[i])
-		fmt.Println("總長度", termsNewLineArray[i])
-	}
-	var apple int = 48
-	k, _ := excelize.CoordinatesToCellName(1, 1)
-	for i := 0; i < a; i++ {
-		for j := 0.0; j < termsNewLineArray[i]; j++ {
-			f.InsertRow("PI", apple)
-			apple = int(float64(apple) + j)
-			k, _ = excelize.CoordinatesToCellName(1, apple)
-		}
-		l, _ := excelize.CoordinatesToCellName(1, apple-int(termsNewLineArray[i]))
-		f.SetCellValue("PI", l, termsNewLineArray[i])
-		f.MergeCell("PI", l, k)
-		f.InsertRow("PI", apple+1)
-		apple += 2
-	}
 
-	termsIsMoreThan1 := theInertTermsRowNumber > 0
-
-	//插入新的row，因為原版位置不夠
-	if termsIsMoreThan1 == true {
-		if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
-			for i := 0; i < theInertTermsRowNumber; i++ {
-				f.InsertRow("PI", 48+theInsertPiNumber+theInertPaymentTermRowNumber)
-			}
-		} else if countPiIsMoreThan5 {
-			for i := 0; i < theInertTermsRowNumber; i++ {
-				f.InsertRow("PI", 48+theInsertPiNumber)
-			}
-		} else if PaymentTermIsMoreThan2 {
-			for i := 0; i < theInertTermsRowNumber; i++ {
-				f.InsertRow("PI", 48+theInertPaymentTermRowNumber)
-			}
-		} else {
-			for i := 0; i < theInertTermsRowNumber; i++ {
-				f.InsertRow("PI", 48)
-			}
-		}
-
-	}
 	//terms的格式設定
 	TermStyle, _ := f.NewStyle(`{
 		"alignment":{
@@ -505,108 +460,164 @@ func main() {
 		},
 		"font": {
 			"family": "Times New Roman",
-			"size" : 8.5
+			"size" : 10
 		}
 	}`)
 
-	//建立表格: terms
-	if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
-		termPosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber+theInertPaymentTermRowNumber)
-		termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber+theInertPaymentTermRowNumber+howManyTermsNewLine)
-		f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
-		f.MergeCell("PI", termPosition, termsMergeLinePosition)
-		f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
-	} else if countPiIsMoreThan5 == true {
-		termPosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber)
-		termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber+howManyTermsNewLine)
-		f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
-		f.MergeCell("PI", termPosition, termsMergeLinePosition)
-		f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
-	} else if PaymentTermIsMoreThan2 == true {
-		termPosition, _ := excelize.CoordinatesToCellName(1, 48+theInertPaymentTermRowNumber)
-		termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+theInertPaymentTermRowNumber+howManyTermsNewLine)
-		f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
-		f.MergeCell("PI", termPosition, termsMergeLinePosition)
-		f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
-	} else {
+	str := readPiContent.Body.Pi.Terms
+	str1 := strings.Split(str, "\n")
+	a := len(str1)
+	var termsNewLineArray [20]float64
+	for i := 0; i < a; i++ {
+		termsNewLineArray[i] = countStringLine(str1[i]) - 1
+		fmt.Println("第", i, "筆資料共要加這麼多行=", termsNewLineArray[i])
+	}
+	var apple int = 47
+	l, _ := excelize.CoordinatesToCellName(11, 1)
+	for i := 0; i < a; i++ {
+		for j := 0.0; j < termsNewLineArray[i]; j++ {
+			f.InsertRow("PI", apple)
+			apple = apple + int(j) + 1
+		}
 
-		termPosition, _ := excelize.CoordinatesToCellName(1, 48)
-		termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+howManyTermsNewLine)
-		f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
-		f.MergeCell("PI", termPosition, termsMergeLinePosition)
-		f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
+		k, _ := excelize.CoordinatesToCellName(1, apple)
+		if termsNewLineArray[i] == 1 {
+			l, _ = excelize.CoordinatesToCellName(11, apple-int(termsNewLineArray[i])+1)
+		} else {
+			l, _ = excelize.CoordinatesToCellName(11, apple-int(termsNewLineArray[i]))
+		}
+		f.InsertRow("PI", apple)
+		f.InsertRow("PI", apple+1)
+		f.SetCellStyle("PI", k, l, TermStyle)
+		f.MergeCell("PI", k, l)
+		f.SetCellValue("PI", l, str1[i])
+		apple++
 
 	}
 
-	//seller部分:
-	if countPiIsMoreThan5 == true && termsIsMoreThan1 == true && PaymentTermIsMoreThan2 {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber+theInertPaymentTermRowNumber+theInertTermsRowNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else if countPiIsMoreThan5 == true && termsIsMoreThan1 == true {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber+theInertTermsRowNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber+theInertPaymentTermRowNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else if termsIsMoreThan1 == true && PaymentTermIsMoreThan2 == true {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInertTermsRowNumber+theInertPaymentTermRowNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else if countPiIsMoreThan5 == true {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else if termsIsMoreThan1 == true {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInertTermsRowNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else if PaymentTermIsMoreThan2 == true {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInertPaymentTermRowNumber)
-		f.SetCellValue("PI", sellerPosition, cell)
-	} else {
-		sellerPosition, _ := excelize.CoordinatesToCellName(2, 52)
-		f.SetCellValue("PI", sellerPosition, cell)
-	}
+	//termsIsMoreThan1 := theInertTermsRowNumber > 0
 
-	//公司及購買者部分:
-	if countPiIsMoreThan5 == true && termsIsMoreThan1 == true && PaymentTermIsMoreThan2 {
+	/*
+		//插入新的row，因為原版位置不夠
+		if termsIsMoreThan1 == true {
+			if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
+				for i := 0; i < theInertTermsRowNumber; i++ {
+					f.InsertRow("PI", 48+theInsertPiNumber+theInertPaymentTermRowNumber)
+				}
+			} else if countPiIsMoreThan5 {
+				for i := 0; i < theInertTermsRowNumber; i++ {
+					f.InsertRow("PI", 48+theInsertPiNumber)
+				}
+			} else if PaymentTermIsMoreThan2 {
+				for i := 0; i < theInertTermsRowNumber; i++ {
+					f.InsertRow("PI", 48+theInertPaymentTermRowNumber)
+				}
+			} else {
+				for i := 0; i < theInertTermsRowNumber; i++ {
+					f.InsertRow("PI", 48)
+				}
+			}
 
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber+theInertPaymentTermRowNumber+theInertTermsRowNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber+theInertPaymentTermRowNumber+theInertTermsRowNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else if countPiIsMoreThan5 == true && termsIsMoreThan1 == true {
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber+theInertTermsRowNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber+theInertTermsRowNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber+theInertPaymentTermRowNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber+theInertPaymentTermRowNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else if termsIsMoreThan1 == true && PaymentTermIsMoreThan2 == true {
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInertPaymentTermRowNumber+theInertTermsRowNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInertPaymentTermRowNumber+theInertTermsRowNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else if countPiIsMoreThan5 == true {
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else if termsIsMoreThan1 == true {
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInertTermsRowNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInertTermsRowNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else if PaymentTermIsMoreThan2 == true {
-		buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInertPaymentTermRowNumber)
-		buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInertPaymentTermRowNumber)
-		f.SetCellValue("PI", buttomSellerPosition, cell)
-		f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
-	} else {
-		f.SetCellValue("PI", "B54", cell)
-		f.SetCellValue("PI", "G54", readPiContent.Body.Pi.Customer.Name)
-	}
+		}
 
+		//建立表格: terms
+		if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
+			termPosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber+theInertPaymentTermRowNumber)
+			termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber+theInertPaymentTermRowNumber+howManyTermsNewLine)
+			f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
+			f.MergeCell("PI", termPosition, termsMergeLinePosition)
+			f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
+		} else if countPiIsMoreThan5 == true {
+			termPosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber)
+			termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+theInsertPiNumber+howManyTermsNewLine)
+			f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
+			f.MergeCell("PI", termPosition, termsMergeLinePosition)
+			f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
+		} else if PaymentTermIsMoreThan2 == true {
+			termPosition, _ := excelize.CoordinatesToCellName(1, 48+theInertPaymentTermRowNumber)
+			termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+theInertPaymentTermRowNumber+howManyTermsNewLine)
+			f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
+			f.MergeCell("PI", termPosition, termsMergeLinePosition)
+			f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
+		} else {
+
+			termPosition, _ := excelize.CoordinatesToCellName(1, 48)
+			termsMergeLinePosition, _ := excelize.CoordinatesToCellName(1, 48+howManyTermsNewLine)
+			f.SetCellValue("PI", termPosition, readPiContent.Body.Pi.Terms)
+			f.MergeCell("PI", termPosition, termsMergeLinePosition)
+			f.SetCellStyle("PI", termPosition, termsMergeLinePosition, TermStyle)
+		}
+	*/
+	/*
+		//seller部分:
+		if countPiIsMoreThan5 == true && termsIsMoreThan1 == true && PaymentTermIsMoreThan2 {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber+theInertPaymentTermRowNumber+theInertTermsRowNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else if countPiIsMoreThan5 == true && termsIsMoreThan1 == true {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber+theInertTermsRowNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber+theInertPaymentTermRowNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else if termsIsMoreThan1 == true && PaymentTermIsMoreThan2 == true {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInertTermsRowNumber+theInertPaymentTermRowNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else if countPiIsMoreThan5 == true {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInsertPiNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else if termsIsMoreThan1 == true {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInertTermsRowNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else if PaymentTermIsMoreThan2 == true {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52+theInertPaymentTermRowNumber)
+			f.SetCellValue("PI", sellerPosition, cell)
+		} else {
+			sellerPosition, _ := excelize.CoordinatesToCellName(2, 52)
+			f.SetCellValue("PI", sellerPosition, cell)
+		}
+
+		//公司及購買者部分:
+		if countPiIsMoreThan5 == true && termsIsMoreThan1 == true && PaymentTermIsMoreThan2 {
+
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber+theInertPaymentTermRowNumber+theInertTermsRowNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber+theInertPaymentTermRowNumber+theInertTermsRowNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else if countPiIsMoreThan5 == true && termsIsMoreThan1 == true {
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber+theInertTermsRowNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber+theInertTermsRowNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else if countPiIsMoreThan5 == true && PaymentTermIsMoreThan2 == true {
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber+theInertPaymentTermRowNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber+theInertPaymentTermRowNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else if termsIsMoreThan1 == true && PaymentTermIsMoreThan2 == true {
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInertPaymentTermRowNumber+theInertTermsRowNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInertPaymentTermRowNumber+theInertTermsRowNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else if countPiIsMoreThan5 == true {
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInsertPiNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInsertPiNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else if termsIsMoreThan1 == true {
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInertTermsRowNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInertTermsRowNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else if PaymentTermIsMoreThan2 == true {
+			buttomSellerPosition, _ := excelize.CoordinatesToCellName(2, 54+theInertPaymentTermRowNumber)
+			buttomBuyerPosition, _ := excelize.CoordinatesToCellName(7, 54+theInertPaymentTermRowNumber)
+			f.SetCellValue("PI", buttomSellerPosition, cell)
+			f.SetCellValue("PI", buttomBuyerPosition, readPiContent.Body.Pi.Customer.Name)
+		} else {
+			f.SetCellValue("PI", "B54", cell)
+			f.SetCellValue("PI", "G54", readPiContent.Body.Pi.Customer.Name)
+		}
+	*/
 	//存檔
 	if err := f.SaveAs("piForHo222222企業.xlsx"); err != nil {
 		fmt.Println(err)

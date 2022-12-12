@@ -3,6 +3,7 @@ module github.com/itsmaheshkariya/gin-gorm-rest
 go 1.19
 
 require (
+	github.com/asmcos/requests v0.0.0-20210319030608-c839e8ae4946 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/gin-gonic/gin v1.8.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
