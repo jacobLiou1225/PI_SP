@@ -1,4 +1,4 @@
-module github.com/itsmaheshkariya/gin-gorm-rest
+module PI
 
 go 1.19
 
