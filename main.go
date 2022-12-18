@@ -3,5 +3,6 @@ package main
 import "PI/pkg"
 
 func main() {
-	pkg.BuildPi()
+	//pkg.BuildPi()
+	pkg.BuildSp()
 }

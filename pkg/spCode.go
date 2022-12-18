@@ -11,7 +11,7 @@ import (
 
 func BuildSp() {
 
-	f, err := excelize.OpenFile("piModle.xlsx")
+	f, err := excelize.OpenFile("spModle.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -184,7 +184,7 @@ func BuildSp() {
 	}
 
 	//存檔
-	if err := f.SaveAs("piForHo222222企業.xlsx"); err != nil {
+	if err := f.SaveAs("spForHo222222企業.xlsx"); err != nil {
 		fmt.Println(err)
 	}
 }
