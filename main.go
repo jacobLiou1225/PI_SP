@@ -1,8 +1,11 @@
 package main
 
-import "PI/pkg"
+import (
+	"PI/pkg"
+	"fmt"
+)
 
 func main() {
-	//pkg.BuildPi()
-	pkg.BuildSp()
+	fmt.Println(pkg.BuildPi("ne33file"))
+	//pkg.BuildSp()
 }

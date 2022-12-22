@@ -9,7 +9,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func BuildSp() {
+func BuildSp(outputName string) (filePath string) {
 
 	f, err := excelize.OpenFile("spModle.xlsx")
 	if err != nil {
@@ -184,7 +184,8 @@ func BuildSp() {
 	}
 
 	//存檔
-	if err := f.SaveAs("spForHo222222企業.xlsx"); err != nil {
+	if err := f.SaveAs(outputName + ".xlsx"); err != nil {
 		fmt.Println(err)
 	}
+	return outputName + ".xlsx"
 }
