@@ -6,6 +6,8 @@ import (
 )
 
 func main() {
-	fmt.Println(pkg.BuildPi("ne33file"))
+	fileName := "請在這裡輸入檔案名稱"
+	fmt.Println(pkg.BuildPi(fileName))
+	fmt.Println(pkg.Api(fileName))
 	//pkg.BuildSp()
 }
