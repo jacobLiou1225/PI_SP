@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	fileName := "請在這裡輸入檔案名稱"
+	fileName := "225"
 	fmt.Println(pkg.BuildPi(fileName))
-	fmt.Println(pkg.Api(fileName))
+	//fmt.Println(pkg.Api(fileName))
 	//pkg.BuildSp()
 }
