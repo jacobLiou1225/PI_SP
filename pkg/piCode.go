@@ -12,6 +12,7 @@ import (
 )
 
 // formal顯示
+
 type Read_Pi_content struct {
 	Code      int       `json:"code"`
 	Timestamp time.Time `json:"timestamp"`
@@ -39,31 +40,16 @@ type Read_Pi_content struct {
 			Transhipment    string  `json:"transhipment"`
 			Remark          string  `json:"remark"`
 			Terms           string  `json:"terms"`
+			BonitaCaseID    string  `json:"bonita_case_id"`
 			Quantity        float64 `json:"quantity"`
 			Amount          float64 `json:"amount"`
 			Customer        struct {
-				CusID           string    `json:"cus_id"`
-				ShortName       string    `json:"short_name"`
-				EngName         string    `json:"eng_name"`
-				Name            string    `json:"name"`
-				ZipCode         string    `json:"zip_code"`
-				Address         string    `json:"address"`
-				Tel             string    `json:"tel"`
-				Fax             string    `json:"fax"`
-				Email           string    `json:"email"`
-				Attention       string    `json:"attention"`
-				AttentionPhone  string    `json:"attention_phone"`
-				Remark          string    `json:"remark"`
-				IsDeleted       bool      `json:"is_deleted"`
-				CreatedAt       time.Time `json:"created_at"`
-				BeneficiaryInfo struct {
-					BeneID    string `json:"bene_id"`
-					Name      string `json:"name"`
-					AcNo      string `json:"ac_no"`
-					Bank      string `json:"bank"`
-					SwiftCode string `json:"swift_code"`
-					Address   string `json:"address"`
-				} `json:"BeneficiaryInfo"`
+				CusID     string `json:"cus_id"`
+				ShortName string `json:"short_name"`
+				EngName   string `json:"eng_name"`
+				Name      string `json:"name"`
+				Email     string `json:"email"`
+				Attention string `json:"attention"`
 			} `json:"Customer"`
 			PiItems []struct {
 				PiItemID  string  `json:"pi_item_id"`
@@ -73,140 +59,131 @@ type Read_Pi_content struct {
 				Size      string  `json:"size"`
 				Quantity  float64 `json:"quantity"`
 				UnitPrice float64 `json:"unit_price"`
-				Amount    float64 `json:"amount"`
+				Amount    int     `json:"amount"`
 			} `json:"PiItems"`
+			RemittanceBeneficiaryInfo struct {
+				BeneID     string `json:"bene_id"`
+				Bank       string `json:"bank"`
+				BankChi    string `json:"bank_chi"`
+				BankChiAbb string `json:"bank_chi_abb"`
+				Name       string `json:"name"`
+				AcNo       string `json:"ac_no"`
+				SwiftCode  string `json:"swift_code"`
+				Address    string `json:"address"`
+				AddressChi string `json:"address_chi"`
+			} `json:"RemittanceBeneficiaryInfo"`
 		} `json:"PI"`
 		Sp struct {
 			OID                     string  `json:"o_id"`
-			RemittanceBank          string  `json:"remittance_bank"`
 			DeliveryDate            string  `json:"delivery_date"`
 			PortOfLoading           string  `json:"port_of_loading"`
 			DelTerm                 string  `json:"del_term"`
 			PortOfDischarge         string  `json:"port_of_discharge"`
 			ContractID              string  `json:"contract_id"`
+			IsTaiImport             bool    `json:"is_tai_import"`
+			IsTaiExport             bool    `json:"is_tai_export"`
+			IsTriangleTrade         bool    `json:"is_triangle_trade"`
 			PaymentTerm             string  `json:"payment_term"`
-			ImportExportDeclaration int     `json:"import_export_declaration"`
-			OtherFee                int     `json:"other_fee"`
-			TriangleTradeNum        int     `json:"triangle_trade_num"`
-			TaiExportNum            int     `json:"tai_export_num"`
-			TaiExport40Num          int     `json:"tai_export_40_num"`
+			OtherFee                float64 `json:"other_fee"`
+			TriangleTradeNum        float64 `json:"triangle_trade_num"`
+			TaiExportNum            float64 `json:"tai_export_num"`
+			TaiExport40Num          float64 `json:"tai_export_40_num"`
 			Remark                  string  `json:"remark"`
-			Rate                    int     `json:"rate"`
-			CoilCost                int     `json:"coil_cost"`
-			TotalProcessingCost     int     `json:"total_processing_cost"`
-			RemainLoss              int     `json:"remain_loss"`
-			BankFee                 int     `json:"bank_fee"`
-			ShippingInsuranceFee    int     `json:"shipping_insurance_fee"`
-			Commission              int     `json:"commission"`
+			Rate                    float64 `json:"rate"`
+			ShippingInsuranceFee    float64 `json:"shipping_insurance_fee"`
+			ImportExportDeclaration float64 `json:"import_export_declaration"`
+			CoilCost                float64 `json:"coil_cost"`
+			TotalProcessingCost     float64 `json:"total_processing_cost"`
+			RemainLoss              float64 `json:"remain_loss"`
+			BankFee                 float64 `json:"bank_fee"`
+			ExportFee               float64 `json:"export_fee"`
+			ExportBankFee           float64 `json:"export_bank_fee"`
+			AvgExportFee            float64 `json:"avg_export_fee"`
+			Commission              float64 `json:"commission"`
 			Quantity                float64 `json:"quantity"`
-			GrossProfitNt           int     `json:"gross_profit_nt"`
-			GrossProfitUs           int     `json:"gross_profit_us"`
+			GrossProfitNt           float64 `json:"gross_profit_nt"`
+			GrossProfitUs           float64 `json:"gross_profit_us"`
 			GrossMargin             string  `json:"gross_margin"`
-			SalesRevenue            int     `json:"sales_revenue"`
-			ShippingCost            int     `json:"shipping_cost"`
-			Customer                struct {
-				CusID           string    `json:"cus_id"`
-				ShortName       string    `json:"short_name"`
-				EngName         string    `json:"eng_name"`
-				Name            string    `json:"name"`
-				ZipCode         string    `json:"zip_code"`
-				Address         string    `json:"address"`
-				Tel             string    `json:"tel"`
-				Fax             string    `json:"fax"`
-				Email           string    `json:"email"`
-				Attention       string    `json:"attention"`
-				AttentionPhone  string    `json:"attention_phone"`
-				Remark          string    `json:"remark"`
-				IsDeleted       bool      `json:"is_deleted"`
-				CreatedAt       time.Time `json:"created_at"`
-				BeneficiaryInfo struct {
-					BeneID    string `json:"bene_id"`
-					Name      string `json:"name"`
-					AcNo      string `json:"ac_no"`
-					Bank      string `json:"bank"`
-					SwiftCode string `json:"swift_code"`
-					Address   string `json:"address"`
-				} `json:"BeneficiaryInfo"`
-			} `json:"Customer"`
-			SpItems []struct {
+			SalesRevenue            float64 `json:"sales_revenue"`
+			ShippingCost            float64 `json:"shipping_cost"`
+			SpItems                 []struct {
 				SpItemID            string  `json:"sp_item_id"`
 				ItemNum             int     `json:"item_num"`
 				Grade               string  `json:"grade"`
 				Edge                string  `json:"edge"`
 				Size                string  `json:"size"`
+				SupplierID          string  `json:"supplier_id"`
+				FabricatorID        string  `json:"fabricator_id"`
 				SupplierName        string  `json:"supplier_name"`
 				FabricatorName      string  `json:"fabricator_name"`
 				UnitPrice           float64 `json:"unit_price"`
 				Price               float64 `json:"price"`
-				ThiPremium          int     `json:"thi_premium"`
-				CostOfImport        int     `json:"cost_of_import"`
-				CoilCost            int     `json:"coil_cost"`
-				FobFee              int     `json:"fob_fee"`
-				Commission          int     `json:"commission"`
-				RemainLoss          int     `json:"remain_loss"`
-				TotalProcessingCost int     `json:"total_processing_cost"`
-				ExportFee           int     `json:"export_fee"`
-				GrossProfit         int     `json:"gross_profit"`
+				ThiPremium          float64 `json:"thi_premium"`
+				CostOfImport        float64 `json:"cost_of_import"`
+				CoilCost            float64 `json:"coil_cost"`
+				FobFee              float64 `json:"fob_fee"`
+				Commission          float64 `json:"commission"`
+				RemainLoss          float64 `json:"remain_loss"`
+				TotalProcessingCost float64 `json:"total_processing_cost"`
+				ExportFee           float64 `json:"export_fee"`
+				GrossProfit         float64 `json:"gross_profit"`
 				Quantity            float64 `json:"quantity"`
-				TotalGrossProfit    int     `json:"total_gross_profit"`
-				Non5Mt              int     `json:"non_5mt"`
-				Slinging            int     `json:"slinging"`
-				Sticker             int     `json:"sticker"`
-				Rpcb                int     `json:"rpcb"`
-				PurchasePrice       int     `json:"purchase_price"`
-				SalesRevenue        int     `json:"sales_revenue"`
-				ShippingCost        int     `json:"shipping_cost"`
-				ProcessingCost      int     `json:"processing_cost"`
-				SalesCost           int     `json:"sales_cost"`
-				RemainLossCost      int     `json:"remain_loss_cost"`
-				ExportDeclaration   int     `json:"export_declaration"`
-				BankFee             int     `json:"bank_fee"`
+				TotalGrossProfit    float64 `json:"total_gross_profit"`
+				Non5Mt              float64 `json:"non_5mt"`
+				Slinging            float64 `json:"slinging"`
+				Sticker             float64 `json:"sticker"`
+				Rpcb                float64 `json:"rpcb"`
+				PurchasePrice       float64 `json:"purchase_price"`
+				SalesRevenue        float64 `json:"sales_revenue"`
+				ShippingCost        float64 `json:"shipping_cost"`
+				ProcessingCost      float64 `json:"processing_cost"`
+				SalesCost           float64 `json:"sales_cost"`
+				RemainLossCost      float64 `json:"remain_loss_cost"`
+				ExportDeclaration   float64 `json:"export_declaration"`
+				BankFee             float64 `json:"bank_fee"`
+				AvgExportFee        float64 `json:"avg_export_fee"`
+				ExportBankFee       float64 `json:"export_bank_fee"`
 			} `json:"SpItems"`
 			FeeDetail struct {
-				FeeID                     string `json:"fee_id"`
-				BulkFobCharges            int    `json:"bulk_fob_charges"`
-				BulkOceanFreight          int    `json:"bulk_ocean_freight"`
-				TaiOceanFreight           int    `json:"tai_ocean_freight"`
-				CsAmericaPremium          int    `json:"cs_america_premium"`
-				TaiOceanFreight40         int    `json:"tai_ocean_freight_40"`
-				ChiOceanFreight           int    `json:"chi_ocean_freight"`
-				Other                     int    `json:"other"`
-				TtRemittanceFee           int    `json:"tt_remittance_fee"`
-				PayTheBalanceAfter30Day   int    `json:"pay_the_balance_after_30day"`
-				DpLcRemittanceFee         int    `json:"dp_lc_remittance_fee"`
-				DpPremium                 int    `json:"dp_premium"`
-				ForwardLcExpenses         int    `json:"forward_lc_expenses"`
-				ForwardLcInterestExpenses int    `json:"forward_lc_interest_expenses"`
-				Use30DayInterestRate      int    `json:"use_30day_interest_rate"`
+				FeeID                     string  `json:"fee_id"`
+				BulkFobCharges            float64 `json:"bulk_fob_charges"`
+				BulkOceanFreight          float64 `json:"bulk_ocean_freight"`
+				TaiOceanFreight           float64 `json:"tai_ocean_freight"`
+				CsAmericaPremium          float64 `json:"cs_america_premium"`
+				TaiOceanFreight40         float64 `json:"tai_ocean_freight_40"`
+				ChiOceanFreight           float64 `json:"chi_ocean_freight"`
+				Other                     float64 `json:"other"`
+				TtRemittanceFee           float64 `json:"tt_remittance_fee"`
+				PayTheBalanceAfter30Day   float64 `json:"pay_the_balance_after_30day"`
+				DpLcRemittanceFee         float64 `json:"dp_lc_remittance_fee"`
+				DpPremium                 float64 `json:"dp_premium"`
+				ForwardLcExpenses         float64 `json:"forward_lc_expenses"`
+				ForwardLcInterestExpenses float64 `json:"forward_lc_interest_expenses"`
+				Use30DayInterestRate      float64 `json:"use_30day_interest_rate"`
 			} `json:"FeeDetail"`
 			ManufacturerFee struct {
 				SupplierFabricatorCost []struct {
 					Name     string  `json:"name"`
 					Quantity float64 `json:"quantity"`
-					Total    int     `json:"total"`
+					Total    float64 `json:"total"`
 				} `json:"SupplierFabricatorCost"`
 				SupplierRevenue []struct {
 					Name     string  `json:"name"`
 					Quantity float64 `json:"quantity"`
-					Total    int     `json:"total"`
+					Total    float64 `json:"total"`
 				} `json:"SupplierRevenue"`
 			} `json:"ManufacturerFee"`
 			ManufacturerOrder []struct {
-				ManuOrderID  string `json:"manu_order_id"`
-				SalesTerm    string `json:"sales_term"`
-				PaymentTerm  string `json:"payment_term"`
-				ContractID   string `json:"contract_id"`
-				Manufacturer struct {
-					ManufacturerID  string `json:"manufacturer_id"`
-					EngName         string `json:"eng_name"`
-					Name            string `json:"name"`
-					BeneficiaryInfo struct {
-						Name      string `json:"name"`
-						AcNo      string `json:"ac_no"`
-						Bank      string `json:"bank"`
-						SwiftCode string `json:"swift_code"`
-						Address   string `json:"address"`
-					} `json:"BeneficiaryInfo"`
+				ManuOrderID    string `json:"manu_order_id"`
+				ItemNum        int    `json:"item_num"`
+				SalesTerm      string `json:"sales_term"`
+				PaymentTerm    string `json:"payment_term"`
+				ContractID     string `json:"contract_id"`
+				ManufacturerID string `json:"manufacturer_id"`
+				Manufacturer   struct {
+					ManufacturerID string `json:"manufacturer_id"`
+					EngName        string `json:"eng_name"`
+					Name           string `json:"name"`
 				} `json:"Manufacturer"`
 			} `json:"ManufacturerOrder"`
 		} `json:"SP"`
@@ -586,11 +563,11 @@ func BuildPi(outputName string) (filePath string) {
 
 	}
 
-	f.SetCellValue("PI", BeneficiaryName[0], readPiContent.Body.Pi.Customer.BeneficiaryInfo.Name)
-	f.SetCellValue("PI", BeneficiaryName[1], readPiContent.Body.Pi.Customer.BeneficiaryInfo.AcNo)
-	f.SetCellValue("PI", BeneficiaryName[2], readPiContent.Body.Pi.Customer.BeneficiaryInfo.Bank)
-	f.SetCellValue("PI", BeneficiaryName[3], readPiContent.Body.Pi.Customer.BeneficiaryInfo.SwiftCode)
-	f.SetCellValue("PI", BeneficiaryName[4], readPiContent.Body.Pi.Customer.BeneficiaryInfo.Address)
+	f.SetCellValue("PI", BeneficiaryName[0], readPiContent.Body.Pi.RemittanceBeneficiaryInfo.Name)
+	f.SetCellValue("PI", BeneficiaryName[1], readPiContent.Body.Pi.RemittanceBeneficiaryInfo.AcNo)
+	f.SetCellValue("PI", BeneficiaryName[2], readPiContent.Body.Pi.RemittanceBeneficiaryInfo.Bank)
+	f.SetCellValue("PI", BeneficiaryName[3], readPiContent.Body.Pi.RemittanceBeneficiaryInfo.SwiftCode)
+	f.SetCellValue("PI", BeneficiaryName[4], readPiContent.Body.Pi.RemittanceBeneficiaryInfo.Address)
 
 	//terms部分 要用到/n
 	//howManyTermsNewLine := strings.Count(readPiContent.Body.Pi.Terms, "\n") + 1

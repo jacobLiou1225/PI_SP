@@ -10,9 +10,9 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func BuildSp(outputName string) (filePath string) {
+func BuildPo(outputName string) (filePath string) {
 
-	f, err := excelize.OpenFile("spModle.xlsx")
+	f, err := excelize.OpenFile("poModle.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -23,7 +23,7 @@ func BuildSp(outputName string) (filePath string) {
 		}
 	}()
 
-	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/b4e71c02-ed05-4a7c-bdfe-132b1d36800f")
+	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/purchase-order/e7dbc0b1-b7a9-4f71-8f5e-b556294a9518")
 	if err != nil {
 		fmt.Println(err)
 		return
