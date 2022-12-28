@@ -133,8 +133,75 @@ func BuildSp(outputName string) (filePath string) {
 		}
 	}
 
-	//最開始的基本資料
+	//doubleArrayProcessing
+	var doubleArrayProcessing [5][4]string
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 4; j++ {
+			doubleArrayProcessing[i][j], _ = excelize.CoordinatesToCellName(42+i, 37+j)
+		}
 
+	}
+
+	var F37ToF40 [4]string
+	for j := 0; j < 4; j++ {
+		F37ToF40[j], _ = excelize.CoordinatesToCellName(6, 37+j)
+	}
+
+	var AB37ToAB40 [4]string
+	for j := 0; j < 4; j++ {
+		AB37ToAB40[j], _ = excelize.CoordinatesToCellName(28, 37+j)
+	}
+
+	// set doubleArrayProcessing formular
+	for j := 0; j < 5; j++ {
+		for i := 0; i < 4; i++ {
+			f.SetCellFormula("SP", doubleArrayProcessing[j][i], "=IF("+F37ToF40[i]+"="+strconv.Itoa(j+1)+","+AB37ToAB40[i]+",\"0\")")
+		}
+	}
+
+	//doubleArrayRealManufac
+	var doubleArrayRealManufac [5][4]string
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 4; j++ {
+			doubleArrayRealManufac[i][j], _ = excelize.CoordinatesToCellName(47+i, 37+j)
+		}
+
+	}
+
+	var Z37ToZ40 [4]string
+	for j := 0; j < 4; j++ {
+		Z37ToZ40[j], _ = excelize.CoordinatesToCellName(26, 37+j)
+	}
+
+	// set doubleArrayRealManufac formular
+	for j := 0; j < 5; j++ {
+		for i := 0; i < 4; i++ {
+			f.SetCellFormula("SP", doubleArrayRealManufac[j][i], "=IF("+E37ToE40[i]+"="+strconv.Itoa(j+1)+","+Z37ToZ40[i]+",\"0\")")
+		}
+	}
+	//設定紅字(非表格)總和公式
+	var Z45ToAE45 [6]string
+	for j := 0; j < 6; j++ {
+		Z45ToAE45[j], _ = excelize.CoordinatesToCellName(26+j, 45)
+	}
+
+	var Z36ToAE36 [6]string
+	for j := 0; j < 6; j++ {
+		Z36ToAE36[j], _ = excelize.CoordinatesToCellName(26+j, 36)
+	}
+	var Z41ToAE41 [6]string
+	for j := 0; j < 6; j++ {
+		Z41ToAE41[j], _ = excelize.CoordinatesToCellName(26+j, 41)
+	}
+
+	for i := 0; i < 6; i++ {
+		f.SetCellFormula("SP", Z45ToAE45[i], "=SUM("+Z36ToAE36[i]+":Z41)")
+	}
+
+	//Q45公斤公式
+	f.SetCellFormula("SP", "Q45", "=SUM(R36:R41)")
+
+	//最開始的基本資料
 	f.SetCellValue("SP", "P5", readPiContent.Body.Sp.DeliveryDate)                    //交貨期
 	f.SetCellValue("SP", "P7", readPiContent.Body.Sp.PortOfLoading)                   //裝貨港
 	f.SetCellValue("SP", "P10", readPiContent.Body.Pi.Customer.Name)                  //客戶名
@@ -142,8 +209,8 @@ func BuildSp(outputName string) (filePath string) {
 	f.SetCellValue("SP", "T7", readPiContent.Body.Sp.PortOfDischarge)                 //卸貨港
 	f.SetCellValue("SP", "T10", readPiContent.Body.Sp.ContractID)                     //合約號:
 	f.SetCellValue("SP", "T14", readPiContent.Body.Sp.PaymentTerm)                    //Payment Term:
-	f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30")                  //公視設定
-	f.SetCellFormula("SP", "E5", "=E4/T24")                                           //公視設定
+	f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30")                  //預估利潤(USD)設定
+	f.SetCellFormula("SP", "E5", "=E4/T24")                                           //毛利率設定
 
 	//數量 (MT)計算
 	for i := 0; i < 5; i++ {
