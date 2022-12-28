@@ -195,12 +195,99 @@ func BuildSp(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < 6; i++ {
-		f.SetCellFormula("SP", Z45ToAE45[i], "=SUM("+Z36ToAE36[i]+":Z41)")
+		f.SetCellFormula("SP", Z45ToAE45[i], "=SUM("+Z36ToAE36[i]+":"+Z41ToAE41[i]+")")
 	}
+
+	//設定紅字(表格)總和公式
+	var AF42ToAY42 [20]string
+	for j := 0; j < 20; j++ {
+		AF42ToAY42[j], _ = excelize.CoordinatesToCellName(32+j, 42)
+	}
+
+	var AF36ToAY36 [20]string
+	for j := 0; j < 20; j++ {
+		AF36ToAY36[j], _ = excelize.CoordinatesToCellName(32+j, 36)
+	}
+	var AF41ToAY41 [20]string
+	for j := 0; j < 20; j++ {
+		AF41ToAY41[j], _ = excelize.CoordinatesToCellName(32+j, 41)
+	}
+
+	for i := 0; i < 20; i++ {
+		f.SetCellFormula("SP", AF42ToAY42[i], "=SUM("+AF36ToAY36[i]+":"+AF41ToAY41[i]+")")
+	}
+
+	// E19 數量
+	var E19ToE23 [5]string
+	for j := 0; j < 5; j++ {
+		E19ToE23[j], _ = excelize.CoordinatesToCellName(5, 23+j)
+	}
+	var AF42ToAJ42 [5]string
+	for j := 0; j < 5; j++ {
+		AF42ToAJ42[j], _ = excelize.CoordinatesToCellName(32+j, 42)
+	}
+
+	for i := 0; i < 5; i++ {
+		f.SetCellFormula("SP", E19ToE23[i], "="+AF42ToAJ42[i]+"")
+	}
+	//E24
+	f.SetCellFormula("SP", "E24", "=SUM(E19:G23)")
+
+	//H18總價
+	var H19ToH23 [5]string
+	for j := 0; j < 5; j++ {
+		H19ToH23[j], _ = excelize.CoordinatesToCellName(8, 19+j)
+	}
+
+	var AK42TOAO42 [5]string
+	for j := 0; j < 5; j++ {
+		AK42TOAO42[j], _ = excelize.CoordinatesToCellName(37+j, 42)
+	}
+	var AP42ToAT42 [5]string
+	for j := 0; j < 5; j++ {
+		AP42ToAT42[j], _ = excelize.CoordinatesToCellName(42+j, 42)
+	}
+
+	for i := 0; i < 5; i++ {
+		f.SetCellFormula("SP", H19ToH23[i], "="+AK42TOAO42[i]+"+"+AP42ToAT42[i]+"")
+	}
+	//I24總和
+	f.SetCellFormula("SP", "I24", "=SUM(H19:L23)")
+
+	//P19數量
+	var P19ToP23 [5]string
+	for j := 0; j < 5; j++ {
+		P19ToP23[j], _ = excelize.CoordinatesToCellName(16, 19+j)
+	}
+
+	for i := 0; i < 5; i++ {
+		f.SetCellFormula("SP", P19ToP23[i], "="+E19ToE23[i]+"")
+	}
+	//P24總和
+	f.SetCellFormula("SP", "P24", "=SUM(P19:R23)")
+
+	//P19數量
+	var S19ToS23 [5]string
+	for j := 0; j < 5; j++ {
+		S19ToS23[j], _ = excelize.CoordinatesToCellName(19, 19+j)
+	}
+
+	var AU42AY42 [5]string
+	for j := 0; j < 5; j++ {
+		AU42AY42[j], _ = excelize.CoordinatesToCellName(47+j, 42)
+	}
+	for i := 0; i < 5; i++ {
+		f.SetCellFormula("SP", S19ToS23[i], "="+AU42AY42[i]+"")
+	}
+	//T24總和
+	f.SetCellFormula("SP", "T24", "=SUM(S19:W23)")
+
+	/////////////////////////////////////////////////////////////////////
 
 	//Q45公斤公式
 	f.SetCellFormula("SP", "Q45", "=SUM(R36:R41)")
-
+	//E47銷售總額
+	f.SetCellFormula("SP", "E47", "=Z45")
 	//最開始的基本資料
 	f.SetCellValue("SP", "P5", readPiContent.Body.Sp.DeliveryDate)                    //交貨期
 	f.SetCellValue("SP", "P7", readPiContent.Body.Sp.PortOfLoading)                   //裝貨港
