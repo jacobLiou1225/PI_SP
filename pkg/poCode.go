@@ -6,9 +6,78 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/xuri/excelize/v2"
 )
+
+type poJson struct {
+	Code      int       `json:"code"`
+	Timestamp time.Time `json:"timestamp"`
+	Body      struct {
+		PurID              string    `json:"pur_id"`
+		OID                string    `json:"o_id"`
+		OrdNum             string    `json:"ord_num"`
+		Attention          string    `json:"attention"`
+		OrdFrom            string    `json:"ord_from"`
+		PoDate             string    `json:"po_date"`
+		ExpectDate         string    `json:"expect_date"`
+		WeightTolerance    string    `json:"weight_tolerance"`
+		ThicknessTolerance string    `json:"thickness_tolerance"`
+		TermsOfTrade       string    `json:"terms_of_trade"`
+		DischargePort      string    `json:"discharge_port"`
+		MarkFormat         string    `json:"mark_format"`
+		Requirements       string    `json:"requirements"`
+		Remark             string    `json:"remark"`
+		BonitaCaseID       string    `json:"bonita_case_id"`
+		CreatedAt          time.Time `json:"created_at"`
+		CreatedBy          string    `json:"created_by"`
+		UpdatedAt          time.Time `json:"updated_at"`
+		UpdatedBy          string    `json:"updated_by"`
+		PlateWeight        int       `json:"plate_weight"`
+		CoilWeight         int       `json:"coil_weight"`
+		TotalQuantity      float64   `json:"total_quantity"`
+		TotalAmount        float64   `json:"total_amount"`
+		Order              struct {
+			OID         string `json:"o_id"`
+			ContractID  string `json:"contract_id"`
+			Attention   string `json:"attention"`
+			Tel         string `json:"tel"`
+			Address     string `json:"address"`
+			OrdDate     string `json:"ord_date"`
+			Description string `json:"description"`
+		} `json:"Order"`
+		PoItems []struct {
+			PoItemID      string `json:"po_item_id"`
+			ItemNum       int    `json:"item_num"`
+			Grade         string `json:"grade"`
+			Edge          string `json:"edge"`
+			Size          string `json:"size"`
+			Quantity      int    `json:"quantity"`
+			FobFoshan     int    `json:"fob_foshan"`
+			FinishedPrice int    `json:"finished_price"`
+			Amount        int    `json:"amount"`
+			Remark        string `json:"remark"`
+			IsAssigned    bool   `json:"is_assigned"`
+		} `json:"PoItems"`
+		OriginalCoil []struct {
+			OriCoilID      string `json:"ori_coil_id"`
+			Grade          string `json:"grade"`
+			SteelPlantName string `json:"steel_plant_name"`
+			Size           string `json:"size"`
+			Quantity       int    `json:"quantity"`
+		} `json:"OriginalCoil"`
+		BackingPaper        []interface{} `json:"backing_paper"`
+		Sticker             []interface{} `json:"sticker"`
+		Packing             []interface{} `json:"packing"`
+		WeightPerPiece      []interface{} `json:"weight_per_piece"`
+		SprayWord           []interface{} `json:"spray_word"`
+		Diameter            []interface{} `json:"diameter"`
+		Pallet              []interface{} `json:"pallet"`
+		ShippingMark        []interface{} `json:"shipping_mark"`
+		DirectionOfEntrance []interface{} `json:"direction_of_entrance"`
+	} `json:"body"`
+}
 
 func BuildPo(outputName string) (filePath string) {
 
@@ -35,9 +104,19 @@ func BuildPo(outputName string) (filePath string) {
 		fmt.Println(err)
 		return
 	}
-	var readPiContent Read_Pi_content
+	var readPiContent poJson
 	json.Unmarshal(body, &readPiContent)
+	//開始的表格 寫死內容
+	f.SetCellValue("PO", "B3", readPiContent.Body.Order.Tel)
+	f.SetCellValue("PO", "C7", readPiContent.Body.Attention)
+	f.SetCellValue("PO", "C8", readPiContent.Body.OrdFrom)
+	f.SetCellValue("PO", "H7", readPiContent.Body.ExpectDate)
+	f.SetCellValue("PO", "H9", readPiContent.Body.Order.ContractID)
+	f.SetCellValue("PO", "H9", readPiContent.Body.OrdNum)
+	f.SetCellFormula("PO", "C9", "=H7+45")
 
+	poItemLength := len(readPiContent.Body.PoItems)
+	fmt.Println(poItemLength)
 	//manuOrderCount :=len(readPiContent.Body.Sp.ManufacturerOrder)
 	var howManyManufacture int = len(readPiContent.Body.Sp.ManufacturerOrder)
 
