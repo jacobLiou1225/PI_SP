@@ -7,7 +7,7 @@ import (
 
 func main() {
 	fileName := "225"
-	fmt.Println(pkg.BuildPo(fileName))
-	//fmt.Println(pkg.Api(fileName))
-	//pkg.BuildSp()
+	fmt.Println(pkg.BuildSpPdf(fileName))
+	fmt.Println(pkg.Api(fileName))
+
 }
