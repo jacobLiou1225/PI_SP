@@ -10,9 +10,6 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func DecidePdfOrExcel(excelOrPdf bool) {
-}
-
 func BuildSpcopy(outputName string, excelOrPdf bool) (filePath string) {
 
 	f, err := excelize.OpenFile("spModle.xlsx")

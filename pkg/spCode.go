@@ -37,9 +37,17 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 	}
 	var readPiContent Read_Pi_content
 	json.Unmarshal(body, &readPiContent)
+
+	//最開始的基本資料
+	f.SetCellValue("SP", "S5", readPiContent.Body.Sp.DeliveryDate)                    //交貨期
+	f.SetCellValue("SP", "P7", readPiContent.Body.Sp.PortOfLoading)                   //裝貨港
+	f.SetCellValue("SP", "P10", readPiContent.Body.Pi.Customer.Name)                  //客戶名
+	f.SetCellValue("SP", "P14", readPiContent.Body.Sp.ManufacturerOrder[0].SalesTerm) //Sales Term   不過這是跟著第一筆資料 ，怪怪的
+	f.SetCellValue("SP", "T7", readPiContent.Body.Sp.PortOfDischarge)                 //卸貨港
+	f.SetCellValue("SP", "T10", readPiContent.Body.Sp.ContractID)                     //合約號:
+	f.SetCellValue("SP", "T14", readPiContent.Body.Sp.PaymentTerm)                    //Payment Term:
 	if excelOrPdf == true {
-		f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30") //預估利潤(USD)設定
-		f.SetCellFormula("SP", "E5", "=E4/T24")                          //毛利率設定
+
 		var howManyManufacture int = len(readPiContent.Body.Sp.ManufacturerOrder)
 
 		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
@@ -59,6 +67,7 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 			}
 
 		}
+
 		//供應商...表格
 		var doubleArraySupplier [5][4]string
 		for i := 0; i < 5; i++ {
@@ -113,6 +122,12 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		var P37TOP40 [4]string
 		for j := 0; j < 4; j++ {
 			P37TOP40[j], _ = excelize.CoordinatesToCellName(16, 37+j)
+		}
+
+		//銀行費用公式
+		var N50ToN55 [6]string
+		for j := 0; j < 6; j++ {
+			N50ToN55[j], _ = excelize.CoordinatesToCellName(14, 50+j)
 		}
 		//***************************************明確位置表格
 
@@ -183,9 +198,13 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		for j := 0; j < 5; j++ {
 			AU42AY42[j], _ = excelize.CoordinatesToCellName(47+j, 42)
 		}
+		var M50ToM55 [6]string
+		for j := 0; j < 6; j++ {
+			M50ToM55[j], _ = excelize.CoordinatesToCellName(13, 50+j)
+		}
 		//********************************單純計算會用到的
 
-		//**********************************************************************************SetCellFormula
+		//********************************SetCellFormula
 		//數量 (MT)計算
 		for i := 0; i < 5; i++ {
 			f.SetCellFormula("SP", E19ToE23[i], "="+AF42ToAJ42[i])
@@ -227,8 +246,7 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		for i := 0; i < 20; i++ {
 			f.SetCellFormula("SP", AF42ToAY42[i], "=SUM("+AF36ToAY36[i]+":"+AF41ToAY41[i]+")")
 		}
-		//E24總和
-		f.SetCellFormula("SP", "E24", "=SUM(E19:G23)")
+
 		//總價計算
 		for i := 0; i < 5; i++ {
 			f.SetCellFormula("SP", H19ToH23[i], "="+AK42TOAO42[i]+"+"+AP42ToAT42[i]+"")
@@ -254,54 +272,111 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		for i := 0; i < 4; i++ {
 			f.SetCellFormula("SP", P37TOP40[i], "=$T$52")
 		}
-		//
-		f.SetCellFormula("SP", "H27", "=V49")  //相關成本費用:進貨成本
-		f.SetCellFormula("SP", "H28", "=AB45") //相關成本費用:進貨成本
-		f.SetCellFormula("SP", "H29", "=AD45") //相關成本費用:進貨成本
+		//銀行費用公式
+		for i := 0; i < 6; i++ {
+			f.SetCellFormula("SP", N50ToN55[i], "="+M50ToM55[i]+"*$T$55")
+		}
+		f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30") //預估利潤(USD)設定
+		f.SetCellFormula("SP", "E5", "=E4/T24")                          //毛利率設定
+		f.SetCellFormula("SP", "E24", "=SUM(E19:G23)")                   //E24總和
+		f.SetCellFormula("SP", "H27", "=V49")                            //相關成本費用:進貨成本
+		f.SetCellFormula("SP", "H28", "=AB45")                           //相關成本費用:進貨成本
+		f.SetCellFormula("SP", "H29", "=AD45")                           //相關成本費用:進貨成本
+		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.OtherFee)      //H30 other fee
 
-		//
-		f.SetCellFormula("SP", "S27", "=SUM(M50:M55)") //相關成本費用:銷貨成本
-		f.SetCellFormula("SP", "S28", "=F58")          //相關成本費用:銷貨成本
-		f.SetCellFormula("SP", "S29", "=E46")          //相關成本費用:銷貨成本
-		f.SetCellFormula("SP", "S30", "=AE45")         //相關成本費用:銷貨成本
-
-		f.SetCellFormula("SP", "Q28", "=F55") //*每櫃
-
-		f.SetCellFormula("SP", "X31", "=T55") //匯率：USD/MT
+		f.SetCellFormula("SP", "K37", "=H37+I37+J37") //鋼捲成本
+		f.SetCellFormula("SP", "K38", "=H38+I38+J38") //鋼捲成本
+		f.SetCellFormula("SP", "K39", "=H39+I39+J39") //鋼捲成本
+		f.SetCellFormula("SP", "K40", "=H40+I40+J40") //鋼捲成本
 
 		f.SetCellFormula("SP", "O37", "=U37+V37+W37+X37") // 加工費總計
 		f.SetCellFormula("SP", "O38", "=U38+V38+W38+X38") // 加工費總計
 		f.SetCellFormula("SP", "O39", "=U39+V39+W39+X39") // 加工費總計
 		f.SetCellFormula("SP", "O40", "=U40+V40+W40+X40") // 加工費總計
 
+		f.SetCellFormula("SP", "Q28", "=F55")                         //*每櫃
 		f.SetCellFormula("SP", "Q37", "=G37-K37-M37-N37-O37-P37-L37") //毛利
 		f.SetCellFormula("SP", "Q38", "=G38-K38-M38-N38-O38-P38-L38") //毛利
 		f.SetCellFormula("SP", "Q39", "=G39-K39-M39-N39-O39-P39-L39") //毛利
 		f.SetCellFormula("SP", "Q40", "=G40-K40-M40-N40-O40-P40-L40") //毛利
+
+		f.SetCellFormula("SP", "S27", "=SUM(M50:M55)") //相關成本費用:銷貨成本
+		f.SetCellFormula("SP", "S28", "=F58")          //相關成本費用:銷貨成本
+		f.SetCellFormula("SP", "S29", "=E46")          //相關成本費用:銷貨成本
+		f.SetCellFormula("SP", "S30", "=AE45")         //相關成本費用:銷貨成本
 
 		f.SetCellFormula("SP", "T37", "=Q37*R37/1000*$T$55") //毛利總和
 		f.SetCellFormula("SP", "T38", "=Q38*R38/1000*$T$55") //毛利總和
 		f.SetCellFormula("SP", "T39", "=Q39*R39/1000*$T$55") //毛利總和
 		f.SetCellFormula("SP", "T40", "=Q40*R40/1000*$T$55") //毛利總和
 
+		f.SetCellFormula("SP", "X31", "=T55") //匯率：USD/MT
+
 		f.SetCellFormula("SP", "Y37", "=(K37+O37)-J37") //採購價
 		f.SetCellFormula("SP", "Y38", "=(K38+O38)-J38") //採購價
 		f.SetCellFormula("SP", "Y39", "=(K39+O39)-J39") //採購價
 		f.SetCellFormula("SP", "Y40", "=(K40+O40)-J40") //採購價
 
-		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.OtherFee) //H30 other fee
+		////////////////////////////////不要印部分
+
+		f.SetCellFormula("SP", "E46", "=M37*Q45/1000")                 //E46佣金金額:
+		f.SetCellFormula("SP", "E47", "=Z45")                          //E47銷售總額
+		f.SetCellFormula("SP", "F57", "=SUM(H51:H56)+IF(F50=1,H50,0)") //TTL NT$
+		f.SetCellFormula("SP", "F58", "=F57/T55")                      //TTL US$
+		f.SetCellFormula("SP", "H50", "=5620+(380*Q45/1000)")          //出口費用公式
+		f.SetCellFormula("SP", "H51", "=F51*(Q45/1000)*$T$55")         //出口費用公式
+		f.SetCellFormula("SP", "H52", "=F52*$O$47*$T$55")              //出口費用公式
+		f.SetCellFormula("SP", "H53", "=F53*$T$55")                    //出口費用公式
+		f.SetCellFormula("SP", "H54", "=F54*$O$48*$T$55")              //出口費用公式
+		f.SetCellFormula("SP", "H55", "=F55*$O$46*$T$55")              //出口費用公式
+		f.SetCellFormula("SP", "H56", "=F56*$O$46*$T$55")              //出口費用公式
+		f.SetCellFormula("SP", "S45", "=ROUND(SUM(T36:T41),0)")        //台幣總毛利
+		f.SetCellFormula("SP", "M57", "=SUM(N50:N55)")                 //TTL
+		f.SetCellFormula("SP", "O45", "=SUM(O46:O48)")                 //O45公式
+		f.SetCellFormula("SP", "Q45", "=SUM(R36:R41)")                 //Q45公斤公式
+		f.SetCellFormula("SP", "S46", "=$S$45/$T$55")                  //美金總毛利
+		f.SetCellFormula("SP", "S47", "=S45/(Z45*$T$55)")              //毛利率
+		f.SetCellFormula("SP", "T50", "=F57+M57")                      //T50合計出口&銀行費用公式
+		f.SetCellFormula("SP", "T51", "=Q45")                          //T51預計出口總重量(KG)公式
+		f.SetCellFormula("SP", "T52", "=$T$50/$T$51*1000/$T$55")       //T52平均出口費用(USD/MT)公式
+		f.SetCellFormula("SP", "V49", "=AA45")                         //隱藏數字V49
+
+		f.SetCellFormula("SP", "Z37", "=ROUND(R37*G37/1000,2)") //銷貨收入
+		f.SetCellFormula("SP", "Z38", "=ROUND(R38*G38/1000,2)") //銷貨收入
+		f.SetCellFormula("SP", "Z39", "=ROUND(R39*G39/1000,2)") //銷貨收入
+		f.SetCellFormula("SP", "Z40", "=ROUND(R40*G40/1000,2)") //銷貨收入
+
+		f.SetCellFormula("SP", "AA37", "=ROUND((H37+I37)*R37/1000,0)") //出貨成本
+		f.SetCellFormula("SP", "AA38", "=ROUND((H38+I38)*R38/1000,0)") //出貨成本
+		f.SetCellFormula("SP", "AA39", "=ROUND((H39+I39)*R39/1000,0)") //出貨成本v
+		f.SetCellFormula("SP", "AA40", "=ROUND((H40+I40)*R40/1000,0)") //出貨成本
+
+		f.SetCellFormula("SP", "AB37", "=ROUND(O37*R37/1000,0)") //加工成本
+		f.SetCellFormula("SP", "AB38", "=ROUND(O38*R38/1000,0)") //加工成本
+		f.SetCellFormula("SP", "AB39", "=ROUND(O39*R39/1000,0)") //加工成本
+		f.SetCellFormula("SP", "AB40", "=ROUND(O40*R40/1000,0)") //加工成本
+
+		f.SetCellFormula("SP", "AC37", "=ROUND((H37+I37+O37)*R37/1000,0)") //銷售成本
+		f.SetCellFormula("SP", "AC38", "=ROUND((H38+I38+O38)*R38/1000,0)") //銷售成本
+		f.SetCellFormula("SP", "AC39", "=ROUND((H39+I39+O39)*R39/1000,0)") //銷售成本
+		f.SetCellFormula("SP", "AC40", "=ROUND((H40+I40+O40)*R40/1000,0)") //銷售成本
+
+		f.SetCellFormula("SP", "AD37", "=N37*R37/1000") //餘料損失
+		f.SetCellFormula("SP", "AD38", "=N38*R38/1000") //餘料損失
+		f.SetCellFormula("SP", "AD39", "=N39*R39/1000") //餘料損失
+		f.SetCellFormula("SP", "AD40", "=N40*R40/1000") //餘料損失
+
+		f.SetCellFormula("SP", "AE37", "=(J37+L37)*R37/1000") //出口報關
+		f.SetCellFormula("SP", "AE38", "=(J38+L38)*R38/1000") //出口報關
+		f.SetCellFormula("SP", "AE39", "=(J39+L39)*R39/1000") //出口報關
+		f.SetCellFormula("SP", "AE40", "=(J40+L40)*R40/1000") //出口報關
+
+		////////////////////////////////不要印部分
+
 		//**********************************************************************************SetCellFormula
 	}
 
 	//**********************************************************************************
-	//最開始的基本資料
-	f.SetCellValue("SP", "S5", readPiContent.Body.Sp.DeliveryDate)                    //交貨期
-	f.SetCellValue("SP", "P7", readPiContent.Body.Sp.PortOfLoading)                   //裝貨港
-	f.SetCellValue("SP", "P10", readPiContent.Body.Pi.Customer.Name)                  //客戶名
-	f.SetCellValue("SP", "P14", readPiContent.Body.Sp.ManufacturerOrder[0].SalesTerm) //Sales Term   不過這是跟著第一筆資料 ，怪怪的
-	f.SetCellValue("SP", "T7", readPiContent.Body.Sp.PortOfDischarge)                 //卸貨港
-	f.SetCellValue("SP", "T10", readPiContent.Body.Sp.ContractID)                     //合約號:
-	f.SetCellValue("SP", "T14", readPiContent.Body.Sp.PaymentTerm)                    //Payment Term:
 
 	//manuOrderCount :=len(readPiContent.Body.Sp.ManufacturerOrder)
 	var howManyManufacture int = len(readPiContent.Body.Sp.ManufacturerOrder)
@@ -346,26 +421,6 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 
 	///////////////////////////////////////////////////////////////////// 不要印的部分
 
-	f.SetCellFormula("SP", "S45", "=ROUND(SUM(T36:T41),0)") //台幣總毛利
-
-	f.SetCellFormula("SP", "S46", "=$S$45/$T$55") //美金總毛利
-
-	f.SetCellFormula("SP", "S47", "=S45/(Z45*$T$55)") //毛利率
-
-	f.SetCellFormula("SP", "Q45", "=SUM(R36:R41)") //Q45公斤公式
-
-	f.SetCellFormula("SP", "T50", "=F57+M57") //T50合計出口&銀行費用公式
-
-	f.SetCellFormula("SP", "T51", "=Q45") //T51預計出口總重量(KG)公式
-
-	f.SetCellFormula("SP", "T52", "=$T$50/$T$51*1000/$T$55") //T52平均出口費用(USD/MT)公式
-
-	f.SetCellFormula("SP", "E47", "=Z45") //E47銷售總額
-
-	f.SetCellFormula("SP", "E46", "=M37*Q45/1000") //E46佣金金額:
-
-	f.SetCellFormula("SP", "V49", "=AA45") //隱藏數字V49
-
 	f.SetCellValue("SP", "F50", readPiContent.Body.Sp.FeeDetail.BulkFobCharges)    //出口費用
 	f.SetCellValue("SP", "F51", readPiContent.Body.Sp.FeeDetail.BulkOceanFreight)  //出口費用
 	f.SetCellValue("SP", "F52", readPiContent.Body.Sp.FeeDetail.TaiOceanFreight)   //出口費用
@@ -374,18 +429,6 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 	f.SetCellValue("SP", "F55", readPiContent.Body.Sp.FeeDetail.ChiOceanFreight)   //出口費用
 	f.SetCellValue("SP", "F56", readPiContent.Body.Sp.FeeDetail.Other)             //出口費用
 
-	f.SetCellFormula("SP", "H50", "=5620+(380*Q45/1000)")  //出口費用公式
-	f.SetCellFormula("SP", "H51", "=F51*(Q45/1000)*$T$55") //出口費用公式
-	f.SetCellFormula("SP", "H52", "=F52*$O$47*$T$55")      //出口費用公式
-	f.SetCellFormula("SP", "H53", "=F53*$T$55")            //出口費用公式
-	f.SetCellFormula("SP", "H54", "=F54*$O$48*$T$55")      //出口費用公式
-	f.SetCellFormula("SP", "H55", "=F55*$O$46*$T$55")      //出口費用公式
-	f.SetCellFormula("SP", "H56", "=F56*$O$46*$T$55")      //出口費用公式
-
-	f.SetCellFormula("SP", "F57", "=SUM(H51:H56)+IF(F50=1,H50,0)") //TTL NT$
-
-	f.SetCellFormula("SP", "F58", "=F57/T55") //TTL US$
-
 	f.SetCellValue("SP", "M50", readPiContent.Body.Sp.FeeDetail.TtRemittanceFee)           //銀行  費用T/T匯款費用
 	f.SetCellValue("SP", "M51", readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day)   //銀行  費用30天尾款
 	f.SetCellValue("SP", "M52", readPiContent.Body.Sp.FeeDetail.DpLcRemittanceFee)         //銀行  費用DP or L/C匯款費用
@@ -393,63 +436,14 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 	f.SetCellValue("SP", "M54", readPiContent.Body.Sp.FeeDetail.ForwardLcExpenses)         //銀行  費用遠期L/C費用
 	f.SetCellValue("SP", "M55", readPiContent.Body.Sp.FeeDetail.ForwardLcInterestExpenses) //銀行  費用遠期L/C利息費用
 	f.SetCellValue("SP", "M56", readPiContent.Body.Sp.FeeDetail.Use30DayInterestRate)      //銀行  費用30天利息
-	//銀行費用公式
-	var N50ToN55 [6]string
-	for j := 0; j < 6; j++ {
-		N50ToN55[j], _ = excelize.CoordinatesToCellName(14, 50+j)
-	}
 
-	var M50ToM55 [6]string
-	for j := 0; j < 6; j++ {
-		M50ToM55[j], _ = excelize.CoordinatesToCellName(13, 50+j)
-	}
-	for i := 0; i < 6; i++ {
-		f.SetCellFormula("SP", N50ToN55[i], "="+M50ToM55[i]+"*$T$55")
-	}
-	//TTL
-	f.SetCellFormula("SP", "M57", "=SUM(N50:N55)")
+	f.SetCellValue("SP", "T55", readPiContent.Body.Sp.Rate) //rate
 
-	//rate
-	f.SetCellValue("SP", "T55", readPiContent.Body.Sp.Rate)
+	f.SetCellValue("SP", "O46", readPiContent.Body.Sp.TriangleTradeNum) //三角貿易
+	f.SetCellValue("SP", "O47", readPiContent.Body.Sp.TaiExportNum)     //三角貿易
+	f.SetCellValue("SP", "O48", readPiContent.Body.Sp.TaiExport40Num)   //三角貿易
 
-	//三角貿易
-	f.SetCellValue("SP", "O46", readPiContent.Body.Sp.TriangleTradeNum)
-	f.SetCellValue("SP", "O47", readPiContent.Body.Sp.TaiExportNum)
-	f.SetCellValue("SP", "O48", readPiContent.Body.Sp.TaiExport40Num)
-	f.SetCellFormula("SP", "O45", "=SUM(O46:O48)") //O45公式
 	///////////////////////////////////////////////////////////////////// 不要印的部分
-
-	//銷貨收入
-	f.SetCellFormula("SP", "Z37", "=ROUND(R37*G37/1000,2)")
-	f.SetCellFormula("SP", "Z38", "=ROUND(R38*G38/1000,2)")
-	f.SetCellFormula("SP", "Z39", "=ROUND(R39*G39/1000,2)")
-	f.SetCellFormula("SP", "Z40", "=ROUND(R40*G40/1000,2)")
-	//出貨成本
-	f.SetCellFormula("SP", "AA37", "=ROUND((H37+I37)*R37/1000,0)")
-	f.SetCellFormula("SP", "AA38", "=ROUND((H38+I38)*R38/1000,0)")
-	f.SetCellFormula("SP", "AA39", "=ROUND((H39+I39)*R39/1000,0)")
-	f.SetCellFormula("SP", "AA40", "=ROUND((H40+I40)*R40/1000,0)")
-
-	//加工成本
-	f.SetCellFormula("SP", "AB37", "=ROUND(O37*R37/1000,0)")
-	f.SetCellFormula("SP", "AB38", "=ROUND(O38*R38/1000,0)")
-	f.SetCellFormula("SP", "AB39", "=ROUND(O39*R39/1000,0)")
-	f.SetCellFormula("SP", "AB40", "=ROUND(O40*R40/1000,0)")
-	//銷售成本
-	f.SetCellFormula("SP", "AC37", "=ROUND((H37+I37+O37)*R37/1000,0)")
-	f.SetCellFormula("SP", "AC38", "=ROUND((H38+I38+O38)*R38/1000,0)")
-	f.SetCellFormula("SP", "AC39", "=ROUND((H39+I39+O39)*R39/1000,0)")
-	f.SetCellFormula("SP", "AC40", "=ROUND((H40+I40+O40)*R40/1000,0)")
-	//餘料損失
-	f.SetCellFormula("SP", "AD37", "=N37*R37/1000")
-	f.SetCellFormula("SP", "AD38", "=N38*R38/1000")
-	f.SetCellFormula("SP", "AD39", "=N39*R39/1000")
-	f.SetCellFormula("SP", "AD40", "=N40*R40/1000")
-	//出口報關
-	f.SetCellFormula("SP", "AE37", "=(J37+L37)*R37/1000")
-	f.SetCellFormula("SP", "AE38", "=(J38+L38)*R38/1000")
-	f.SetCellFormula("SP", "AE39", "=(J39+L39)*R39/1000")
-	f.SetCellFormula("SP", "AE40", "=(J40+L40)*R40/1000")
 
 	for i, _ := range readPiContent.Body.Sp.SpItems {
 		f.SetCellValue("SP", doubleArrayPiTerms[0][0+i], i+1)
@@ -567,12 +561,6 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 	for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
 		f.SetCellValue("SP", manufacturerNameAtC19[i], n.Manufacturer.Name) //在(C,19)放入n.name
 	}
-
-	//鋼捲成本
-	/*f.SetCellFormula("SP", "K37", "=H37+I37+J37")
-	f.SetCellFormula("SP", "K38", "=H38+I38+J38")
-	f.SetCellFormula("SP", "K39", "=H39+I39+J39")
-	f.SetCellFormula("SP", "K40", "=H40+I40+J40")*/
 
 	//存檔
 	if err := f.SaveAs(outputName + ".xlsx"); err != nil {
