@@ -9,12 +9,6 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func DecidePdfOrExcel(excelOrPdf bool) {
-	if excelOrPdf == true {
-
-	}
-}
-
 func BuildSpPdf(outputName string) (filePath string) {
 
 	f, err := excelize.OpenFile("ccc.xlsx")
@@ -96,39 +90,6 @@ func BuildSpPdf(outputName string) (filePath string) {
 
 	//H30 other fee
 	f.SetCellValue("SP", "H30", readPiContent.Body.Sp.OtherFee)
-	/*
-
-		//鋼捲成本
-		for i, n := range readPiContent.Body.Sp.SpItems {
-			f.SetCellValue("SP", doubleArrayPiTerms[10][0+i], n.Price+n.ThiPremium+n.CostOfImport)
-			fmt.Println("csasacs", doubleArrayPiTerms[10][0+i])
-		}
-		// 加工費    總計
-		for i, n := range readPiContent.Body.Sp.SpItems {
-			f.SetCellValue("SP", doubleArrayPiTerms[14][0+i], n.Non5Mt+n.Slinging+n.Sticker+n.Rpcb)
-			fmt.Println("csasacs", doubleArrayPiTerms[14][0+i])
-		}
-		totalExportWeight := 0.0
-		for _, n := range readPiContent.Body.Sp.SpItems {
-			totalExportWeight += n.Quantity
-			fmt.Println(totalExportWeight)
-		}
-		exprotTtl := 0.0
-
-		H50, _ := f.GetCellValue("SP", "F50")
-		if H50 == "1" {
-			exprotTtl = 5620 + (380 * totalExportWeight / 1000) + readPiContent.Body.Sp.FeeDetail.BulkOceanFreight*readPiContent.Body.Sp.Rate*(totalExportWeight/1000) + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight*readPiContent.Body.Sp.Rate*readPiContent.Body.Sp.TaiExportNum + readPiContent.Body.Sp.FeeDetail.CsAmericaPremium*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight40*readPiContent.Body.Sp.TaiExport40Num*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ChiOceanFreight*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.Other*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate
-		} else {
-			exprotTtl = readPiContent.Body.Sp.FeeDetail.BulkOceanFreight*readPiContent.Body.Sp.Rate*(totalExportWeight/1000) + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight*readPiContent.Body.Sp.Rate*readPiContent.Body.Sp.TaiExportNum + readPiContent.Body.Sp.FeeDetail.CsAmericaPremium*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight40*readPiContent.Body.Sp.TaiExport40Num*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ChiOceanFreight*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.Other*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate
-		}
-
-		feeTtl:= readPiContent.Body.Sp.FeeDetail.TtRemittanceFee*readPiContent.Body.Sp.Rate
-
-		//  出口     費用
-		/*for i, n := range readPiContent.Body.Sp.SpItems {
-
-		}
-	*/
 
 	for i, _ := range readPiContent.Body.Sp.SpItems {
 		f.SetCellValue("SP", doubleArrayPiTerms[0][0+i], i+1)

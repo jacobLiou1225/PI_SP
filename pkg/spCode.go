@@ -10,7 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
+func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 
 	f, err := excelize.OpenFile("spModle.xlsx")
 	if err != nil {
@@ -46,12 +46,40 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 	f.SetCellValue("SP", "T7", readPiContent.Body.Sp.PortOfDischarge)                 //卸貨港
 	f.SetCellValue("SP", "T10", readPiContent.Body.Sp.ContractID)                     //合約號:
 	f.SetCellValue("SP", "T14", readPiContent.Body.Sp.PaymentTerm)                    //Payment Term:
-	if excelOrPdf == true {
 
-		var howManyManufacture int = len(readPiContent.Body.Sp.ManufacturerOrder)
+	if excelOrPdf == "excel" {
+
+		//var howManyManufacture int = len(readPiContent.Body.Sp.SpItems)
 
 		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
 		//***************************************明確位置表格
+
+		//台灣進口--sales Term
+		var TWImportSalesTerm [6]string
+		for i := 0; i < 5; i++ {
+			TWImportSalesTerm[i], _ = excelize.CoordinatesToCellName(8, 9+2*i)
+		}
+		//廠商名稱/鋼種
+		var manufacturerNameAtC19 [5]string
+		for i := 0; i < 5; i++ {
+			manufacturerNameAtC19[i], _ = excelize.CoordinatesToCellName(3, 19+i)
+		}
+
+		//三角貿易--廠商
+		var manufacturerOrderArray [6]string
+		for i := 0; i < 5; i++ {
+			manufacturerOrderArray[i], _ = excelize.CoordinatesToCellName(3, 8+2*i)
+		}
+		//三角貿易--sales Term
+		var manufacturerSalesTermArray [6]string
+		for i := 0; i < 5; i++ {
+			manufacturerSalesTermArray[i], _ = excelize.CoordinatesToCellName(3, 9+2*i)
+		}
+		//台灣進口--廠商
+		var TWImportManufac [6]string
+		for i := 0; i < 5; i++ {
+			TWImportManufac[i], _ = excelize.CoordinatesToCellName(8, 8+2*i)
+		}
 		//sp主要的表單
 		var doubleArrayPiTerms [25][6]string
 		for i := 0; i < 24; i++ {
@@ -157,11 +185,11 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		}
 
 		var AF42ToAJ42 [5]string
-		for i := 0; i < howManyManufacture; i++ {
+		for i := 0; i < 5; i++ {
 			AF42ToAJ42[i], _ = excelize.CoordinatesToCellName(32+i, 42)
 		}
 		var E19ToE23 [5]string
-		for i := 0; i < howManyManufacture; i++ {
+		for i := 0; i < 5; i++ {
 			E19ToE23[i], _ = excelize.CoordinatesToCellName(5, 19+i)
 		}
 
@@ -204,7 +232,8 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		}
 		//********************************單純計算會用到的
 
-		//********************************SetCellFormula
+		//********************************************************SetCellFormula
+
 		//數量 (MT)計算
 		for i := 0; i < 5; i++ {
 			f.SetCellFormula("SP", E19ToE23[i], "="+AF42ToAJ42[i])
@@ -246,7 +275,6 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		for i := 0; i < 20; i++ {
 			f.SetCellFormula("SP", AF42ToAY42[i], "=SUM("+AF36ToAY36[i]+":"+AF41ToAY41[i]+")")
 		}
-
 		//總價計算
 		for i := 0; i < 5; i++ {
 			f.SetCellFormula("SP", H19ToH23[i], "="+AK42TOAO42[i]+"+"+AP42ToAT42[i]+"")
@@ -256,8 +284,10 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 
 		//P19數量
 		for i := 0; i < 5; i++ {
-			f.SetCellFormula("SP", P19ToP23[i], "="+E19ToE23[i]+"")
+			f.SetCellFormula("SP", P19ToP23[i], "="+E19ToE23[i])
+
 		}
+
 		//P24總和
 		f.SetCellFormula("SP", "P24", "=SUM(P19:R23)")
 
@@ -276,13 +306,13 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		for i := 0; i < 6; i++ {
 			f.SetCellFormula("SP", N50ToN55[i], "="+M50ToM55[i]+"*$T$55")
 		}
+
 		f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30") //預估利潤(USD)設定
 		f.SetCellFormula("SP", "E5", "=E4/T24")                          //毛利率設定
 		f.SetCellFormula("SP", "E24", "=SUM(E19:G23)")                   //E24總和
 		f.SetCellFormula("SP", "H27", "=V49")                            //相關成本費用:進貨成本
 		f.SetCellFormula("SP", "H28", "=AB45")                           //相關成本費用:進貨成本
 		f.SetCellFormula("SP", "H29", "=AD45")                           //相關成本費用:進貨成本
-		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.OtherFee)      //H30 other fee
 
 		f.SetCellFormula("SP", "K37", "=H37+I37+J37") //鋼捲成本
 		f.SetCellFormula("SP", "K38", "=H38+I38+J38") //鋼捲成本
@@ -348,7 +378,7 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 
 		f.SetCellFormula("SP", "AA37", "=ROUND((H37+I37)*R37/1000,0)") //出貨成本
 		f.SetCellFormula("SP", "AA38", "=ROUND((H38+I38)*R38/1000,0)") //出貨成本
-		f.SetCellFormula("SP", "AA39", "=ROUND((H39+I39)*R39/1000,0)") //出貨成本v
+		f.SetCellFormula("SP", "AA39", "=ROUND((H39+I39)*R39/1000,0)") //出貨成本
 		f.SetCellFormula("SP", "AA40", "=ROUND((H40+I40)*R40/1000,0)") //出貨成本
 
 		f.SetCellFormula("SP", "AB37", "=ROUND(O37*R37/1000,0)") //加工成本
@@ -371,200 +401,423 @@ func BuildSp(outputName string, excelOrPdf bool) (filePath string) {
 		f.SetCellFormula("SP", "AE39", "=(J39+L39)*R39/1000") //出口報關
 		f.SetCellFormula("SP", "AE40", "=(J40+L40)*R40/1000") //出口報關
 
+		//********************************************************SetCellFormula
+
+		//setcellvalue
+
+		f.SetCellValue("SP", "F50", readPiContent.Body.Sp.FeeDetail.BulkFobCharges)    //出口費用 散貨FOB費用
+		f.SetCellValue("SP", "F51", readPiContent.Body.Sp.FeeDetail.BulkOceanFreight)  //出口費用 出散貨(每噸)
+		f.SetCellValue("SP", "F52", readPiContent.Body.Sp.FeeDetail.TaiOceanFreight)   //出口費用 台灣出口(20'櫃)
+		f.SetCellValue("SP", "F53", readPiContent.Body.Sp.FeeDetail.CsAmericaPremium)  //出口費用 中南美保費
+		f.SetCellValue("SP", "F54", readPiContent.Body.Sp.FeeDetail.TaiOceanFreight40) //出口費用 台灣出口(40'櫃)
+		f.SetCellValue("SP", "F55", readPiContent.Body.Sp.FeeDetail.ChiOceanFreight)   //出口費用 大陸出口(整櫃)
+		f.SetCellValue("SP", "F56", readPiContent.Body.Sp.FeeDetail.Other)             //出口費用 其他出口費用
+
+		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.OtherFee) //H30 other fee
+
+		f.SetCellValue("SP", "M50", readPiContent.Body.Sp.FeeDetail.TtRemittanceFee)           //銀行  費用T/T匯款費用
+		f.SetCellValue("SP", "M51", readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day)   //銀行  費用30天尾款
+		f.SetCellValue("SP", "M52", readPiContent.Body.Sp.FeeDetail.DpLcRemittanceFee)         //銀行  費用DP or L/C匯款費用
+		f.SetCellValue("SP", "M53", readPiContent.Body.Sp.FeeDetail.DpPremium)                 //銀行  費用DP 保費
+		f.SetCellValue("SP", "M54", readPiContent.Body.Sp.FeeDetail.ForwardLcExpenses)         //銀行  費用遠期L/C費用
+		f.SetCellValue("SP", "M55", readPiContent.Body.Sp.FeeDetail.ForwardLcInterestExpenses) //銀行  費用遠期L/C利息費用
+		f.SetCellValue("SP", "M56", readPiContent.Body.Sp.FeeDetail.Use30DayInterestRate)      //銀行  費用30天利息
+
+		f.SetCellValue("SP", "O46", readPiContent.Body.Sp.TriangleTradeNum) //三角貿易 預計出貨20'櫃數(triangle)
+		f.SetCellValue("SP", "O47", readPiContent.Body.Sp.TaiExportNum)     //三角貿易 預計出貨20'櫃數(tw)
+		f.SetCellValue("SP", "O48", readPiContent.Body.Sp.TaiExport40Num)   //三角貿易 預計出貨40'櫃數
+
+		f.SetCellValue("SP", "T55", readPiContent.Body.Sp.Rate) //rate
+
 		////////////////////////////////不要印部分
 
-		//**********************************************************************************SetCellFormula
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[0][0+i], i+1)
+			//在(A,37)紀錄編號
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[1][0+i], n.Grade)
+			//在(B,37)紀錄鋼的材質
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[2][0+i], n.Edge)
+			//在(c,37)紀錄edge
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[3][0+i], n.Size)
+			//在(d,37)紀錄尺寸
+		}
+
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 1)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 2)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 3)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 4)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 5)
+			}
+
+			//在(E,37)紀錄供應商編號
+		}
+
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 1)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 2)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 3)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 4)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 5)
+			}
+			//在(F,37)紀錄加工廠編號
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[6][0+i], n.UnitPrice)
+			//在(G,37)紀錄售價
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[7][0+i], n.Price)
+			//在(H,37)紀錄盤價
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[8][0+i], n.ThiPremium)
+			//在(i,37)紀錄後寬度加價
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[9][0+i], n.CostOfImport)
+			//在(J,37)紀錄進口成本
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[11][0+i], n.FobFee)
+			//在(L,37)紀錄FobFee
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[12][0+i], n.Commission)
+			//在(M,37)紀錄Commission
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[13][0+i], n.RemainLoss)
+			//在(N,37)紀錄RemainLoss
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[17][0+i], n.Quantity)
+			//在(R,37)紀錄Quantity
+
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[20][0+i], n.Non5Mt)
+			//在(U,37)紀錄Non5Mt
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[21][0+i], n.Slinging)
+			//在(V,37)紀錄Slinging
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[22][0+i], n.Sticker)
+			//在(W,37)紀錄Sticker
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[23][0+i], n.Rpcb)
+			//在(X,37)紀錄Rpcb
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", manufacturerOrderArray[i], n.Manufacturer.Name) //在(C,8)放入n.ManuOrderID
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", manufacturerSalesTermArray[i], n.SalesTerm) //在(C,9)放入n.SalesTerm
+
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", TWImportManufac[i], n.ContractID) //在(H,8)放入n.ManuOrderID
+
+		}
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", TWImportSalesTerm[i+1], n.PaymentTerm) //在(H,9)放入n.SalesTerm
+
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+			f.SetCellValue("SP", manufacturerNameAtC19[i], n.Manufacturer.Name) //在(C,19)放入n.name
+		}
+
+		//存檔
+		if err := f.SaveAs(outputName + ".xlsx"); err != nil {
+			fmt.Println(err)
+		}
+		return outputName + ".xlsx"
+
+	} else {
+		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
+
+		//三角貿易--廠商
+		var manufacturerOrderArray [6]string
+		for i := 0; i < 5; i++ {
+			manufacturerOrderArray[i], _ = excelize.CoordinatesToCellName(3, 8+2*i)
+		}
+		//三角貿易--sales Term
+		var manufacturerSalesTermArray [6]string
+		for i := 0; i < 5; i++ {
+			manufacturerSalesTermArray[i], _ = excelize.CoordinatesToCellName(3, 9+2*i)
+		}
+		//台灣進口--廠商
+		var TWImportManufac [6]string
+		for i := 0; i < 5; i++ {
+			TWImportManufac[i], _ = excelize.CoordinatesToCellName(8, 8+2*i)
+		}
+
+		//台灣進口--sales Term
+		var TWImportSalesTerm [6]string
+		for i := 0; i < 5; i++ {
+			TWImportSalesTerm[i], _ = excelize.CoordinatesToCellName(8, 9+2*i)
+		}
+		//廠商名稱/鋼種
+		var manufacturerNameAtC19 [5]string
+		for i := 0; i < 5; i++ {
+			manufacturerNameAtC19[i], _ = excelize.CoordinatesToCellName(3, 19+i)
+		}
+
+		//中下的關鍵表格
+		var doubleArrayPiTerms [26][6]string
+		for i := 0; i < 25; i++ {
+			for j := 0; j < howManySpItem; j++ {
+				doubleArrayPiTerms[i][j], _ = excelize.CoordinatesToCellName(1+i, 37+j)
+			}
+
+		}
+
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[0][0+i], i+1)
+			//在(A,37)紀錄編號
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[1][0+i], n.Grade)
+			//在(B,37)紀錄鋼的材質
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[2][0+i], n.Edge)
+			//在(c,37)紀錄edge
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[3][0+i], n.Size)
+			//在(d,37)紀錄尺寸
+		}
+
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 1)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 2)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 3)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 4)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].SupplierName {
+				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 5)
+			}
+
+			//在(E,37)紀錄供應商編號
+		}
+
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 1)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 2)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 3)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 4)
+			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].FabricatorName {
+				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 5)
+			}
+			//在(F,37)紀錄加工廠編號
+		}
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[6][0+i], n.UnitPrice)
+			//在(G,37)紀錄售價
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[7][0+i], n.Price)
+			//在(H,37)紀錄盤價
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[8][0+i], n.ThiPremium)
+			//在(i,37)紀錄後寬度加價
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[9][0+i], n.CostOfImport)
+			//在(J,37)紀錄進口成本
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[11][0+i], n.FobFee)
+			//在(L,37)紀錄FobFee
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[12][0+i], n.Commission)
+			//在(M,37)紀錄Commission
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[13][0+i], n.RemainLoss)
+			//在(N,37)紀錄RemainLoss
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[17][0+i], n.Quantity)
+			//在(R,37)紀錄Quantity
+			//HERE'S QUESTION
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[20][0+i], n.Non5Mt)
+			//在(U,37)紀錄Non5Mt
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[21][0+i], n.Slinging)
+			//在(V,37)紀錄Slinging
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[22][0+i], n.Sticker)
+			//在(W,37)紀錄Sticker
+		}
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[23][0+i], n.Rpcb)
+			//在(X,37)紀錄Rpcb
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", manufacturerOrderArray[i], n.Manufacturer.Name) //在(C,8)放入n.ManuOrderID
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", manufacturerSalesTermArray[i], n.SalesTerm) //在(C,9)放入n.SalesTerm
+
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", TWImportManufac[i], n.ContractID) //在(H,8)放入n.ManuOrderID
+
+		}
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+
+			f.SetCellValue("SP", TWImportSalesTerm[i+1], n.PaymentTerm) //在(H,9)放入n.SalesTerm
+
+		}
+
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+			f.SetCellValue("SP", manufacturerNameAtC19[i], n.Manufacturer.Name) //在(C,19)放入n.name
+		}
+
+		//鋼捲成本
+		var ironArray [5]float64
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			ironArray[i] = n.Price + n.ThiPremium + n.CostOfImport
+			f.SetCellValue("SP", doubleArrayPiTerms[10][0+i], ironArray[i])
+		}
+		// 加工費總計
+		var fabricatorArray [5]float64
+		for i, n := range readPiContent.Body.Sp.SpItems {
+
+			fabricatorArray[i] = n.Non5Mt + n.Slinging + n.Sticker + n.Rpcb
+			f.SetCellValue("SP", doubleArrayPiTerms[14][0+i], fabricatorArray[i])
+
+		}
+
+		//出口費用公式計算
+		totalExportWeight := 0.0 //預計出口總重量( KG)
+		for _, n := range readPiContent.Body.Sp.SpItems {
+			totalExportWeight += n.Quantity
+			fmt.Println(totalExportWeight)
+		} //預計出口總重量( KG)
+
+		exprotTtl := 0.0 //出口費用ttl
+
+		if readPiContent.Body.Sp.FeeDetail.BulkFobCharges == 1 {
+			exprotTtl = 5620 + (380 * totalExportWeight / 1000) + readPiContent.Body.Sp.FeeDetail.BulkOceanFreight*readPiContent.Body.Sp.Rate*(totalExportWeight/1000) + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight*readPiContent.Body.Sp.Rate*readPiContent.Body.Sp.TaiExportNum + readPiContent.Body.Sp.FeeDetail.CsAmericaPremium*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight40*readPiContent.Body.Sp.TaiExport40Num*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ChiOceanFreight*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.Other*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate //出口費用ttl
+		} else {
+			exprotTtl = readPiContent.Body.Sp.FeeDetail.BulkOceanFreight*readPiContent.Body.Sp.Rate*(totalExportWeight/1000) + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight*readPiContent.Body.Sp.Rate*readPiContent.Body.Sp.TaiExportNum + readPiContent.Body.Sp.FeeDetail.CsAmericaPremium*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.TaiOceanFreight40*readPiContent.Body.Sp.TaiExport40Num*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ChiOceanFreight*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.Other*readPiContent.Body.Sp.TriangleTradeNum*readPiContent.Body.Sp.Rate //出口費用ttl
+		}
+
+		feeTtl := readPiContent.Body.Sp.FeeDetail.TtRemittanceFee*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.DpLcRemittanceFee*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.DpPremium*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ForwardLcExpenses*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ForwardLcInterestExpenses*readPiContent.Body.Sp.Rate //銀行費用ttl
+
+		totalExportAndBankFee := exprotTtl + feeTtl //合計出口&銀行費用，也是 出口費用
+
+		//出口費用
+		for i, _ := range readPiContent.Body.Sp.SpItems {
+			f.SetCellValue("SP", doubleArrayPiTerms[15][0+i], totalExportAndBankFee)
+		}
+		//毛利
+		var grossProfit [5]float64
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			grossProfit[i] = n.Price - ironArray[i] - n.FobFee - n.Commission - n.RemainLoss - fabricatorArray[i] - totalExportAndBankFee
+			f.SetCellValue("SP", doubleArrayPiTerms[16][0+i], grossProfit[i])
+		}
+		//毛利總計
+		var totalGrossProfit [5]float64
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			totalGrossProfit[i] = grossProfit[i] * n.Quantity / 1000 * readPiContent.Body.Sp.Rate
+			f.SetCellValue("SP", doubleArrayPiTerms[19][0+i], totalGrossProfit[i])
+		}
+		//採購價
+		var buyingPrice [5]float64
+		for i, n := range readPiContent.Body.Sp.SpItems {
+			buyingPrice[i] = (ironArray[i] + fabricatorArray[i]) - n.CostOfImport
+			f.SetCellValue("SP", doubleArrayPiTerms[24][0+i], buyingPrice[i])
+		}
+		//存檔
+		if err := f.SaveAs(outputName + ".xlsx"); err != nil {
+			fmt.Println(err)
+		}
+		return outputName + ".xlsx"
+
 	}
 
 	//**********************************************************************************
 
 	//manuOrderCount :=len(readPiContent.Body.Sp.ManufacturerOrder)
-	var howManyManufacture int = len(readPiContent.Body.Sp.ManufacturerOrder)
+	//var howManyManufacture int = len(readPiContent.Body.Sp.ManufacturerOrder)
 
-	var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
-
-	//三角貿易--廠商
-	var manufacturerOrderArray [6]string
-	for i := 0; i < 5; i++ {
-		manufacturerOrderArray[i], _ = excelize.CoordinatesToCellName(3, 8+2*i)
-	}
-	//三角貿易--sales Term
-	var manufacturerSalesTermArray [6]string
-	for i := 0; i < 5; i++ {
-		manufacturerSalesTermArray[i], _ = excelize.CoordinatesToCellName(3, 9+2*i)
-	}
-	//台灣進口--廠商
-	var TWImportManufac [6]string
-	for i := 0; i < 5; i++ {
-		TWImportManufac[i], _ = excelize.CoordinatesToCellName(8, 8+2*i)
-	}
-
-	//台灣進口--sales Term
-	var TWImportSalesTerm [6]string
-	for i := 0; i < 5; i++ {
-		TWImportSalesTerm[i], _ = excelize.CoordinatesToCellName(8, 9+2*i)
-	}
-	//廠商名稱/鋼種
-	var manufacturerNameAtC19 [5]string
-	for i := 0; i < howManyManufacture; i++ {
-		manufacturerNameAtC19[i], _ = excelize.CoordinatesToCellName(3, 19+i)
-	}
-
-	//中下的關鍵表格
-	var doubleArrayPiTerms [25][6]string
-	for i := 0; i < 24; i++ {
-		for j := 0; j < howManySpItem; j++ {
-			doubleArrayPiTerms[i][j], _ = excelize.CoordinatesToCellName(1+i, 37+j)
-		}
-
-	}
-
-	///////////////////////////////////////////////////////////////////// 不要印的部分
-
-	f.SetCellValue("SP", "F50", readPiContent.Body.Sp.FeeDetail.BulkFobCharges)    //出口費用
-	f.SetCellValue("SP", "F51", readPiContent.Body.Sp.FeeDetail.BulkOceanFreight)  //出口費用
-	f.SetCellValue("SP", "F52", readPiContent.Body.Sp.FeeDetail.TaiOceanFreight)   //出口費用
-	f.SetCellValue("SP", "F53", readPiContent.Body.Sp.FeeDetail.CsAmericaPremium)  //出口費用
-	f.SetCellValue("SP", "F54", readPiContent.Body.Sp.FeeDetail.TaiOceanFreight40) //出口費用
-	f.SetCellValue("SP", "F55", readPiContent.Body.Sp.FeeDetail.ChiOceanFreight)   //出口費用
-	f.SetCellValue("SP", "F56", readPiContent.Body.Sp.FeeDetail.Other)             //出口費用
-
-	f.SetCellValue("SP", "M50", readPiContent.Body.Sp.FeeDetail.TtRemittanceFee)           //銀行  費用T/T匯款費用
-	f.SetCellValue("SP", "M51", readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day)   //銀行  費用30天尾款
-	f.SetCellValue("SP", "M52", readPiContent.Body.Sp.FeeDetail.DpLcRemittanceFee)         //銀行  費用DP or L/C匯款費用
-	f.SetCellValue("SP", "M53", readPiContent.Body.Sp.FeeDetail.DpPremium)                 //銀行  費用DP 保費
-	f.SetCellValue("SP", "M54", readPiContent.Body.Sp.FeeDetail.ForwardLcExpenses)         //銀行  費用遠期L/C費用
-	f.SetCellValue("SP", "M55", readPiContent.Body.Sp.FeeDetail.ForwardLcInterestExpenses) //銀行  費用遠期L/C利息費用
-	f.SetCellValue("SP", "M56", readPiContent.Body.Sp.FeeDetail.Use30DayInterestRate)      //銀行  費用30天利息
-
-	f.SetCellValue("SP", "T55", readPiContent.Body.Sp.Rate) //rate
-
-	f.SetCellValue("SP", "O46", readPiContent.Body.Sp.TriangleTradeNum) //三角貿易
-	f.SetCellValue("SP", "O47", readPiContent.Body.Sp.TaiExportNum)     //三角貿易
-	f.SetCellValue("SP", "O48", readPiContent.Body.Sp.TaiExport40Num)   //三角貿易
-
-	///////////////////////////////////////////////////////////////////// 不要印的部分
-
-	for i, _ := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[0][0+i], i+1)
-		//在(A,37)紀錄編號
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[1][0+i], n.Grade)
-		//在(B,37)紀錄鋼的材質
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[2][0+i], n.Edge)
-		//在(c,37)紀錄edge
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[3][0+i], n.Size)
-		//在(d,37)紀錄尺寸
-	}
-
-	for i, _ := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], i+1)
-		//在(E,37)紀錄供應商編號
-	}
-
-	for i, _ := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], i+1)
-		//在(F,37)紀錄加工廠編號
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[6][0+i], n.UnitPrice)
-		//在(G,37)紀錄售價
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[7][0+i], n.Price)
-		//在(H,37)紀錄盤價
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[8][0+i], n.ThiPremium)
-		//在(i,37)紀錄後寬度加價
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[9][0+i], n.CostOfImport)
-		//在(J,37)紀錄進口成本
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[11][0+i], n.FobFee)
-		//在(L,37)紀錄FobFee
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[12][0+i], n.Commission)
-		//在(M,37)紀錄Commission
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[13][0+i], n.RemainLoss)
-		//在(N,37)紀錄RemainLoss
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[17][0+i], n.Quantity)
-		//在(R,37)紀錄Quantity
-		//HERE'S QUESTION
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[20][0+i], n.Non5Mt)
-		//在(U,37)紀錄Non5Mt
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[21][0+i], n.Slinging)
-		//在(V,37)紀錄Slinging
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[22][0+i], n.Sticker)
-		//在(W,37)紀錄Sticker
-	}
-
-	for i, n := range readPiContent.Body.Sp.SpItems {
-		f.SetCellValue("SP", doubleArrayPiTerms[23][0+i], n.Rpcb)
-		//在(X,37)紀錄Rpcb
-	}
-
-	for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-
-		f.SetCellValue("SP", manufacturerOrderArray[i], n.Manufacturer.Name) //在(C,8)放入n.ManuOrderID
-	}
-
-	for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-
-		f.SetCellValue("SP", manufacturerSalesTermArray[i], n.SalesTerm) //在(C,9)放入n.SalesTerm
-
-	}
-
-	for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-
-		f.SetCellValue("SP", TWImportManufac[i], n.ContractID) //在(H,8)放入n.ManuOrderID
-
-	}
-	for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-
-		f.SetCellValue("SP", TWImportSalesTerm[i+1], n.PaymentTerm) //在(H,9)放入n.SalesTerm
-
-	}
-
-	for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-		f.SetCellValue("SP", manufacturerNameAtC19[i], n.Manufacturer.Name) //在(C,19)放入n.name
-	}
-
-	//存檔
-	if err := f.SaveAs(outputName + ".xlsx"); err != nil {
-		fmt.Println(err)
-	}
-	return outputName + ".xlsx"
 }

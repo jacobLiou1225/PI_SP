@@ -10,7 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func BuildSpcopy(outputName string, excelOrPdf bool) (filePath string) {
+func BuildSpcopy(outputName string) (filePath string) {
 
 	f, err := excelize.OpenFile("spModle.xlsx")
 	if err != nil {
@@ -37,10 +37,7 @@ func BuildSpcopy(outputName string, excelOrPdf bool) (filePath string) {
 	}
 	var readPiContent Read_Pi_content
 	json.Unmarshal(body, &readPiContent)
-	if excelOrPdf == true {
-		f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30") //預估利潤(USD)設定
-		f.SetCellFormula("SP", "E5", "=E4/T24")                          //毛利率設定
-	}
+
 	//最開始的基本資料
 	f.SetCellValue("SP", "S5", readPiContent.Body.Sp.DeliveryDate)                    //交貨期
 	f.SetCellValue("SP", "P7", readPiContent.Body.Sp.PortOfLoading)                   //裝貨港

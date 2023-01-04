@@ -5,10 +5,89 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/xuri/excelize/v2"
 )
+
+func CheckBuy(n interface{}) string {
+	interfaceString := n.(string)
+	if strings.Contains(interfaceString, "需要") {
+		return "■需要□不需要"
+	} else {
+		return "□需要■不需要"
+	}
+}
+func CheckHeavy(n interface{}) string {
+	interfaceString := n.(string)
+	if strings.Contains(interfaceString, "扣重") {
+		return "■扣重□不扣重"
+	} else {
+		return "□扣重■不扣重"
+	}
+}
+
+func CheckpoliFilm(n interface{}) string {
+	interfaceString := n.(string)
+	if strings.Contains(interfaceString, "POLI-FILM") {
+		return "■POLI-FILM"
+	} else {
+		return "□POLI-FILM"
+	}
+}
+
+func CheckNovacel(n interface{}) string {
+	interfaceString := n.(string)
+	if strings.Contains(interfaceString, "NOVACEL") {
+		return "■NOVACEL"
+	} else {
+		return "□NOVACEL"
+	}
+}
+func CheckBlueBlack(n interface{}) string {
+	interfaceString := n.(string)
+	if strings.Contains(interfaceString, "黑白") {
+		return "□藍色■黑白"
+	} else {
+		return "■藍色□黑白"
+	}
+}
+
+func CheckMicroLaser(n interface{}) string {
+	interfaceString := n.(string)
+	if strings.Contains(interfaceString, "100") {
+		return "■100 Micro Laser PE, □80 Micro PE, □70 Micro PE□50 Micro PE"
+	} else if strings.Contains(interfaceString, "80") {
+		return "□100 Micro Laser PE, ■80 Micro PE, □70 Micro PE□50 Micro PE"
+	} else if strings.Contains(interfaceString, "70") {
+		return "□100 Micro Laser PE, □80 Micro PE, ■70 Micro PE□50 Micro PE"
+	} else {
+		return "□100 Micro Laser PE, □80 Micro PE, □70 Micro PE■50 Micro PE"
+	}
+
+}
+
+func CheckContainer(n []interface{}) string {
+	var boolMidel bool
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		fmt.Println(valStr)
+		interfaceString := v.(string)
+		if strings.Contains(interfaceString, "中性") {
+			boolMidel = true
+
+		} else {
+			boolMidel = true
+		}
+	}
+	if boolMidel == true {
+		return "■中性包裝 □標準外銷包裝"
+	} else {
+		return "□中性包裝 ■標準外銷包裝 "
+	}
+
+}
 
 type poJson struct {
 	Code      int       `json:"code"`
@@ -225,6 +304,8 @@ func BuildPo(outputName string) (filePath string) {
 	//總額(USD) total
 	f.SetCellFormula("PO", "H16", "=SUM(H12:H15)")
 
+	kk := CheckBuy(readPiContent.Body.BackingPaper)
+	fmt.Println("gghggh", kk)
 	//存檔
 	if err := f.SaveAs(outputName + ".xlsx"); err != nil {
 		fmt.Println(err)
