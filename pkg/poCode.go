@@ -78,7 +78,7 @@ func CheckContainer(n []interface{}) string {
 			boolMidel = true
 
 		} else {
-			boolMidel = true
+			boolMidel = false
 		}
 	}
 	if boolMidel == true {
@@ -304,8 +304,6 @@ func BuildPo(outputName string) (filePath string) {
 	//總額(USD) total
 	f.SetCellFormula("PO", "H16", "=SUM(H12:H15)")
 
-	kk := CheckBuy(readPiContent.Body.BackingPaper)
-	fmt.Println("gghggh", kk)
 	//存檔
 	if err := f.SaveAs(outputName + ".xlsx"); err != nil {
 		fmt.Println(err)

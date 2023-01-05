@@ -575,7 +575,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 		return outputName + ".xlsx"
 
-	} else {
+	} else if excelOrPdf == "pdf" {
 		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
 
 		//三角貿易--廠商
@@ -598,6 +598,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		var TWImportSalesTerm [6]string
 		for i := 0; i < 5; i++ {
 			TWImportSalesTerm[i], _ = excelize.CoordinatesToCellName(8, 9+2*i)
+
 		}
 		//廠商名稱/鋼種
 		var manufacturerNameAtC19 [5]string
@@ -743,7 +744,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
 
-			f.SetCellValue("SP", TWImportSalesTerm[i+1], n.PaymentTerm) //在(H,9)放入n.SalesTerm
+			f.SetCellValue("SP", TWImportSalesTerm[i], n.PaymentTerm) //在(H,9)放入n.SalesTerm
 
 		}
 
@@ -783,16 +784,19 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 
 		feeTtl := readPiContent.Body.Sp.FeeDetail.TtRemittanceFee*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.DpLcRemittanceFee*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.DpPremium*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ForwardLcExpenses*readPiContent.Body.Sp.Rate + readPiContent.Body.Sp.FeeDetail.ForwardLcInterestExpenses*readPiContent.Body.Sp.Rate //銀行費用ttl
 
-		totalExportAndBankFee := exprotTtl + feeTtl //合計出口&銀行費用，也是 出口費用
+		totalExportAndBankFee := exprotTtl + feeTtl //合計出口&銀行費用
+
+		averageExportFee := totalExportAndBankFee / totalExportWeight * 1000 / readPiContent.Body.Sp.Rate //平均出口費用(USD/MT)，也是 出口費用
 
 		//出口費用
 		for i, _ := range readPiContent.Body.Sp.SpItems {
-			f.SetCellValue("SP", doubleArrayPiTerms[15][0+i], totalExportAndBankFee)
+			f.SetCellValue("SP", doubleArrayPiTerms[15][0+i], averageExportFee)
 		}
 		//毛利
 		var grossProfit [5]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
-			grossProfit[i] = n.Price - ironArray[i] - n.FobFee - n.Commission - n.RemainLoss - fabricatorArray[i] - totalExportAndBankFee
+			grossProfit[i] = n.UnitPrice - ironArray[i] - n.FobFee - n.Commission - n.RemainLoss - fabricatorArray[i] - totalExportAndBankFee
+			fmt.Println(n.FobFee)
 			f.SetCellValue("SP", doubleArrayPiTerms[16][0+i], grossProfit[i])
 		}
 		//毛利總計
@@ -807,12 +811,52 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			buyingPrice[i] = (ironArray[i] + fabricatorArray[i]) - n.CostOfImport
 			f.SetCellValue("SP", doubleArrayPiTerms[24][0+i], buyingPrice[i])
 		}
+
+		/////////////////////////////////////////////////////////////////////////////////////
+		var E19Amount float64
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+			if readPiContent.Body.Sp.SpItems[i].SupplierName == n.Manufacturer.Name {
+				E19Amount += readPiContent.Body.Sp.SpItems[i].Quantity
+			}
+		}
+		f.SetCellValue("SP", "E19", E19Amount/1000)
+
+		var E20Amount float64
+		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
+			if readPiContent.Body.Sp.SpItems[i].SupplierName == n.Manufacturer.Name {
+				E20Amount += readPiContent.Body.Sp.SpItems[i].Quantity
+			}
+		}
+		f.SetCellValue("SP", "E20", E20Amount)
+
+		/////////////////////////////////////////////////////////////////////////////////////
+		/*
+			//E19~E23的位置
+			var E19ToE23 [5]string
+			for i := 0; i < 5; i++ {
+				E19ToE23[i], _ = excelize.CoordinatesToCellName(5, 19+i)
+			}
+			//回頭做E19~E23的數量
+			var E19Amount [5]float64
+
+			for i, _ := range readPiContent.Body.Sp.SpItems {
+				for _, n := range readPiContent.Body.Sp.SpItems {
+					if n.SupplierName == readPiContent.Body.Sp.ManufacturerOrder[i].Manufacturer.Name {
+						E19Amount[i] += n.Quantity / 1000
+					}
+				}
+
+				f.SetCellValue("SP", E19ToE23[i], E19Amount[i])
+			}*/
+
 		//存檔
 		if err := f.SaveAs(outputName + ".xlsx"); err != nil {
 			fmt.Println(err)
 		}
 		return outputName + ".xlsx"
+	} else {
 
+		return "請在檔名後輸入版本\",pdf\"或\",excel\""
 	}
 
 	//**********************************************************************************

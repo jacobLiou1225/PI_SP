@@ -83,7 +83,7 @@ func BuildPi(outputName string, readPiContent orderModel.Pi_content) (filePath s
 	}
 
 	//Pi第一個表格
-	var countPi int = len(readPiContent.Body.Pi.PiItems)
+	var countPi int = len(readPiContent.PiItems)
 	var theInsertPiNumber int = countPi - 4
 	countPiIsMoreThan4 := countPi > 4
 	piFirstArrayBottom := 23
