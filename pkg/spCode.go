@@ -10,6 +10,29 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+func decideManufactureToSpItem(income string) int {
+	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/b4e71c02-ed05-4a7c-bdfe-132b1d36800f")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+	var readPiContent Read_Pi_content
+	json.Unmarshal(body, &readPiContent)
+
+	tempReturn := 0
+	manufacureNum := len(readPiContent.Body.Sp.ManufacturerOrder)
+	for i := 0; i < manufacureNum; i++ {
+		if income == readPiContent.Body.Sp.ManufacturerOrder[i].Manufacturer.Name {
+			tempReturn = i
+		}
+	}
+	return tempReturn
+}
+
 func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 
 	f, err := excelize.OpenFile("spModle.xlsx")
@@ -771,7 +794,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		totalExportWeight := 0.0 //預計出口總重量( KG)
 		for _, n := range readPiContent.Body.Sp.SpItems {
 			totalExportWeight += n.Quantity
-			fmt.Println(totalExportWeight)
+
 		} //預計出口總重量( KG)
 
 		exprotTtl := 0.0 //出口費用ttl
@@ -796,7 +819,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		var grossProfit [5]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			grossProfit[i] = n.UnitPrice - ironArray[i] - n.FobFee - n.Commission - n.RemainLoss - fabricatorArray[i] - totalExportAndBankFee
-			fmt.Println(n.FobFee)
+
 			f.SetCellValue("SP", doubleArrayPiTerms[16][0+i], grossProfit[i])
 		}
 		//毛利總計
@@ -813,6 +836,12 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////
+		var E19 [5]int
+		for i := 0; i < len(readPiContent.Body.Sp.SpItems); i++ {
+			E19[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
+			fmt.Println(E19[i])
+		}
+
 		var E19Amount float64
 		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
 			if readPiContent.Body.Sp.SpItems[i].SupplierName == n.Manufacturer.Name {
