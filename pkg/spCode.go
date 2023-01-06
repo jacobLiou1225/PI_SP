@@ -835,48 +835,44 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			f.SetCellValue("SP", doubleArrayPiTerms[24][0+i], buyingPrice[i])
 		}
 
-		/////////////////////////////////////////////////////////////////////////////////////
-		var E19 [5]int
+		//////////////////////////////////////////////////////////////////////////////////////回頭做E19~E23的數量
+		var SpitemToManufactureNum [5]int
 		for i := 0; i < len(readPiContent.Body.Sp.SpItems); i++ {
-			E19[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
-			fmt.Println(E19[i])
+			SpitemToManufactureNum[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
+			fmt.Println(SpitemToManufactureNum[i])
+		}
+		var E19ToE23 [5]string
+		for i := 0; i < 5; i++ {
+			E19ToE23[i], _ = excelize.CoordinatesToCellName(5, 19+i)
 		}
 
-		var E19Amount float64
-		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-			if readPiContent.Body.Sp.SpItems[i].SupplierName == n.Manufacturer.Name {
-				E19Amount += readPiContent.Body.Sp.SpItems[i].Quantity
-			}
-		}
-		f.SetCellValue("SP", "E19", E19Amount/1000)
-
-		var E20Amount float64
-		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
-			if readPiContent.Body.Sp.SpItems[i].SupplierName == n.Manufacturer.Name {
-				E20Amount += readPiContent.Body.Sp.SpItems[i].Quantity
-			}
-		}
-		f.SetCellValue("SP", "E20", E20Amount)
-
-		/////////////////////////////////////////////////////////////////////////////////////
-		/*
-			//E19~E23的位置
-			var E19ToE23 [5]string
-			for i := 0; i < 5; i++ {
-				E19ToE23[i], _ = excelize.CoordinatesToCellName(5, 19+i)
-			}
-			//回頭做E19~E23的數量
-			var E19Amount [5]float64
-
-			for i, _ := range readPiContent.Body.Sp.SpItems {
-				for _, n := range readPiContent.Body.Sp.SpItems {
-					if n.SupplierName == readPiContent.Body.Sp.ManufacturerOrder[i].Manufacturer.Name {
-						E19Amount[i] += n.Quantity / 1000
-					}
+		var E19ToE23Amount [5]float64
+		for i := 0; i < 5; i++ {
+			for j, n := range readPiContent.Body.Sp.SpItems {
+				if SpitemToManufactureNum[j] == i {
+					E19ToE23Amount[i] += n.Quantity
 				}
+			}
+			f.SetCellValue("SP", E19ToE23[i], E19ToE23Amount[i]/1000)
+		}
 
-				f.SetCellValue("SP", E19ToE23[i], E19Amount[i])
-			}*/
+		//////////////////////////////////////////////////////////////////////////////////////回頭做E19~E23的數量
+		var H19ToH23 [5]string
+		for i := 0; i < 5; i++ {
+			H19ToH23[i], _ = excelize.CoordinatesToCellName(8, 19+i)
+		}
+
+		var H19ToH23supply [5]float64
+		var H19ToH23Procing [5]float64
+		for i := 0; i < 5; i++ {
+			for j, n := range readPiContent.Body.Sp.SpItems {
+				if SpitemToManufactureNum[j] == i {
+					H19ToH23supply[i] += (n.Price + n.ThiPremium) * n.Quantity / 1000
+					H19ToH23Procing[i] += fabricatorArray[i] * n.Quantity / 1000
+				}
+			}
+			f.SetCellValue("SP", H19ToH23[i], H19ToH23supply[i]+H19ToH23Procing[i])
+		}
 
 		//存檔
 		if err := f.SaveAs(outputName + ".xlsx"); err != nil {
