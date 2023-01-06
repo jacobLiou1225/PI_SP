@@ -41,7 +41,7 @@ func Api(outputName string) (filePath string) {
 		fmt.Println(err)
 		return
 	}
-	req.Header.Add("Authorization", "Bearer pdf_live_bxnx3bbyLOOxkLW59E8yspzKcX1sa0go7J2tWGD5Dgh")
+	req.Header.Add("Authorization", "Bearer pdf_live_P5CLu6rZ5xUn3HbfpzDRMD1IEfD4FRdqBm4NfU0xiEr")
 	req.Header.Add("Cookie", "AWSALB=zXv9IwcA9RTznlC5nNZ5fFM9KA3rmI7jTa7+WN4uPFfTGG/ivZJo50KTSFkKgUjoJdiCJtnydxPCyRqdJz+IaaM2LrMoRF0TqrsnlCz9jrw40XfSalNsqCEgRatn; AWSALBCORS=zXv9IwcA9RTznlC5nNZ5fFM9KA3rmI7jTa7+WN4uPFfTGG/ivZJo50KTSFkKgUjoJdiCJtnydxPCyRqdJz+IaaM2LrMoRF0TqrsnlCz9jrw40XfSalNsqCEgRatn")
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())

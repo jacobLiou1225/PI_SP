@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strconv"
 
 	"github.com/xuri/excelize/v2"
 )
 
+func Round(x, unit float64) float64 {
+	return math.Round(x/unit) * unit
+}
 func decideManufactureToSpItem(income string) int {
 	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/b4e71c02-ed05-4a7c-bdfe-132b1d36800f")
 	if err != nil {
@@ -71,7 +75,12 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 	f.SetCellValue("SP", "T14", readPiContent.Body.Sp.PaymentTerm)                    //Payment Term:
 
 	if excelOrPdf == "excel" {
+		//spitem的加工廠編號
+		var SpitemToManufactureNum [100]int
+		for i := 0; i < len(readPiContent.Body.Sp.SpItems); i++ {
+			SpitemToManufactureNum[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
 
+		}
 		//var howManyManufacture int = len(readPiContent.Body.Sp.SpItems)
 
 		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
@@ -180,6 +189,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		for j := 0; j < 6; j++ {
 			N50ToN55[j], _ = excelize.CoordinatesToCellName(14, 50+j)
 		}
+
 		//***************************************明確位置表格
 
 		//********************************單純計算會用到的
@@ -436,7 +446,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		f.SetCellValue("SP", "F55", readPiContent.Body.Sp.FeeDetail.ChiOceanFreight)   //出口費用 大陸出口(整櫃)
 		f.SetCellValue("SP", "F56", readPiContent.Body.Sp.FeeDetail.Other)             //出口費用 其他出口費用
 
-		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.OtherFee) //H30 other fee
+		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.FeeDetail.Other) //H30 other fee
 
 		f.SetCellValue("SP", "M50", readPiContent.Body.Sp.FeeDetail.TtRemittanceFee)           //銀行  費用T/T匯款費用
 		f.SetCellValue("SP", "M51", readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day)   //銀行  費用30天尾款
@@ -475,35 +485,16 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		for i, _ := range readPiContent.Body.Sp.SpItems {
-			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 1)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 2)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 3)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 4)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 5)
-			}
 
-			//在(E,37)紀錄供應商編號
-		}
+			f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], SpitemToManufactureNum[i]+1)
+
+		} //在(E,37)紀錄供應商編號
 
 		for i, _ := range readPiContent.Body.Sp.SpItems {
-			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 1)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 2)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 3)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 4)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 5)
-			}
-			//在(F,37)紀錄加工廠編號
-		}
+
+			f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], SpitemToManufactureNum[i]+1)
+
+		} //在(F,37)紀錄加工廠編號
 
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			f.SetCellValue("SP", doubleArrayPiTerms[6][0+i], n.UnitPrice)
@@ -637,6 +628,12 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			}
 
 		}
+		//spitem的加工廠編號
+		var SpitemToManufactureNum [100]int
+		for i := 0; i < len(readPiContent.Body.Sp.SpItems); i++ {
+			SpitemToManufactureNum[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
+
+		}
 
 		for i, _ := range readPiContent.Body.Sp.SpItems {
 			f.SetCellValue("SP", doubleArrayPiTerms[0][0+i], i+1)
@@ -659,35 +656,17 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		for i, _ := range readPiContent.Body.Sp.SpItems {
-			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 1)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 2)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 3)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 4)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].SupplierName {
-				f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], 5)
-			}
 
-			//在(E,37)紀錄供應商編號
-		}
+			f.SetCellValue("SP", doubleArrayPiTerms[4][0+i], SpitemToManufactureNum[i]+1)
+
+		} //在(E,37)紀錄供應商編號
 
 		for i, _ := range readPiContent.Body.Sp.SpItems {
-			if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[1].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 1)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[2].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 2)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[3].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 3)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[4].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 4)
-			} else if readPiContent.Body.Sp.SpItems[i].SupplierName == readPiContent.Body.Sp.SpItems[5].FabricatorName {
-				f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], 5)
-			}
-			//在(F,37)紀錄加工廠編號
-		}
+
+			f.SetCellValue("SP", doubleArrayPiTerms[5][0+i], SpitemToManufactureNum[i]+1)
+
+		} //在(F,37)紀錄加工廠編號
+
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			f.SetCellValue("SP", doubleArrayPiTerms[6][0+i], n.UnitPrice)
 			//在(G,37)紀錄售價
@@ -836,11 +815,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		//////////////////////////////////////////////////////////////////////////////////////回頭做E19~E23的數量
-		var SpitemToManufactureNum [5]int
-		for i := 0; i < len(readPiContent.Body.Sp.SpItems); i++ {
-			SpitemToManufactureNum[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
-			fmt.Println(SpitemToManufactureNum[i])
-		}
+
 		var E19ToE23 [5]string
 		for i := 0; i < 5; i++ {
 			E19ToE23[i], _ = excelize.CoordinatesToCellName(5, 19+i)
@@ -857,13 +832,14 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		//////////////////////////////////////////////////////////////////////////////////////回頭做E19~E23的數量
+		//總價 (USD)
 		var H19ToH23 [5]string
 		for i := 0; i < 5; i++ {
 			H19ToH23[i], _ = excelize.CoordinatesToCellName(8, 19+i)
 		}
 
-		var H19ToH23supply [5]float64
-		var H19ToH23Procing [5]float64
+		var H19ToH23supply [5]float64  //出貨成本計算
+		var H19ToH23Procing [5]float64 //加工成本計算
 		for i := 0; i < 5; i++ {
 			for j, n := range readPiContent.Body.Sp.SpItems {
 				if SpitemToManufactureNum[j] == i {
@@ -873,15 +849,133 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			}
 			f.SetCellValue("SP", H19ToH23[i], H19ToH23supply[i]+H19ToH23Procing[i])
 		}
+		//數量 (MT)
+		var P19ToP23 [5]string
+		for i := 0; i < 5; i++ {
+			P19ToP23[i], _ = excelize.CoordinatesToCellName(16, 19+i)
+		}
+		for i := 0; i < 5; i++ {
+			f.SetCellValue("SP", P19ToP23[i], E19ToE23Amount[i]/1000)
+		}
+		//總價 (USD)
+		var S19ToS23 [5]string
+		for i := 0; i < 5; i++ {
+			S19ToS23[i], _ = excelize.CoordinatesToCellName(19, 19+i)
+		}
+		var S19ToS23TotalPrice [5]float64
+		for i := 0; i < 5; i++ {
+			for j, n := range readPiContent.Body.Sp.SpItems {
+				if SpitemToManufactureNum[j] == i {
+					S19ToS23TotalPrice[i] += n.UnitPrice * n.Quantity / 1000
+				}
+			}
+			f.SetCellValue("SP", S19ToS23[i], S19ToS23TotalPrice[i])
+		}
+
+		//E24數量 (MT)
+		totalAmount := 0.0
+		for i := 0; i < 5; i++ {
+			totalAmount += E19ToE23Amount[i] / 1000
+		}
+		f.SetCellValue("SP", "E24", totalAmount)
+
+		//I24總價 (USD)
+		totalPrice := 0.0
+		for i := 0; i < 5; i++ {
+			totalPrice += H19ToH23supply[i] + H19ToH23Procing[i]
+		}
+		//T24總價 (USD) 總和
+		totalPriceT24 := 0.0
+		for i := 0; i < 5; i++ {
+			totalPriceT24 += S19ToS23TotalPrice[i]
+		}
+		f.SetCellValue("SP", "T24", totalPriceT24)
+
+		f.SetCellValue("SP", "I24", totalPrice)
+		//P24數量 (MT)
+		f.SetCellValue("SP", "P24", totalAmount)
+		//S24總價 (USD)
+		totalManufactureSell := 0.0
+		for i := 0; i < 5; i++ {
+			totalManufactureSell += S19ToS23TotalPrice[i]
+		}
+		//鋼捲成本(盤價＋厚度＋進口)
+		H27IronCost := 0.0
+
+		for _, n := range readPiContent.Body.Sp.SpItems {
+
+			H27IronCost += Round((n.Price+n.ThiPremium)*n.Quantity/1000, 1)
+			fmt.Println(H27IronCost)
+
+		}
+		f.SetCellValue("SP", "H27", H27IronCost)
+
+		//加工費用總計(包裝＋拋砂＋貼膜＋修邊＋切版)
+
+		H28TotalFabricatorFee := 0.0
+
+		for i, n := range readPiContent.Body.Sp.SpItems {
+
+			H28TotalFabricatorFee += Round(fabricatorArray[i]*n.Quantity/1000, 1)
+
+		}
+		f.SetCellValue("SP", "H28", H28TotalFabricatorFee)
+
+		//餘料損失
+
+		H29LosingOther := 0.0
+
+		for _, n := range readPiContent.Body.Sp.SpItems {
+
+			H29LosingOther += n.RemainLoss * n.Quantity / 1000
+
+		}
+		f.SetCellValue("SP", "H29", H29LosingOther)
+
+		//其他費用
+
+		f.SetCellValue("SP", "H30", readPiContent.Body.Sp.FeeDetail.Other)
+
+		//銀行費用
+
+		S27BankFee := 0.0
+		S27BankFee = readPiContent.Body.Sp.FeeDetail.TtRemittanceFee + readPiContent.Body.Sp.FeeDetail.PayTheBalanceAfter30Day + readPiContent.Body.Sp.FeeDetail.DpLcRemittanceFee + readPiContent.Body.Sp.FeeDetail.DpPremium + readPiContent.Body.Sp.FeeDetail.ForwardLcExpenses + readPiContent.Body.Sp.FeeDetail.ForwardLcInterestExpenses
+		f.SetCellValue("SP", "S27", S27BankFee)
+		//*每櫃
+		f.SetCellValue("SP", "Q28", readPiContent.Body.Sp.FeeDetail.ChiOceanFreight)
+		// 運保費
+		f.SetCellValue("SP", "S28", exprotTtl/readPiContent.Body.Sp.Rate)
+
+		//佣金
+		f.SetCellValue("SP", "S29", readPiContent.Body.Sp.SpItems[0].Commission*totalExportWeight/1000)
+		//進出口報關
+		S30ExInportFee := 0.0
+
+		for _, n := range readPiContent.Body.Sp.SpItems {
+
+			S30ExInportFee += (n.CostOfImport + n.FobFee) * n.Quantity / 1000
+
+		}
+		f.SetCellValue("SP", "S30", S30ExInportFee)
+		//匯率：USD/MT
+		f.SetCellValue("SP", "X31", readPiContent.Body.Sp.Rate)
+
+		//預估利潤(USD)在一開始
+
+		//刪除欄
 
 		//存檔
+
 		if err := f.SaveAs(outputName + ".xlsx"); err != nil {
 			fmt.Println(err)
 		}
 		return outputName + ".xlsx"
-	} else {
 
-		return "請在檔名後輸入版本\",pdf\"或\",excel\""
+	} else if excelOrPdf != "pdf" && excelOrPdf != "excel" {
+		fmt.Print("請在檔名後輸入版本,\"pdf\"或,\"excel\"")
+		return ""
+	} else {
+		return ""
 	}
 
 	//**********************************************************************************
