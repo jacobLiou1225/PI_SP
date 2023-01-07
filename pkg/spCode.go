@@ -77,13 +77,19 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 	if excelOrPdf == "excel" {
 		//spitem的加工廠編號
 		var SpitemToManufactureNum [100]int
+		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
+		theSpitemMoreThan4 := howManySpItem - 4
+		if theSpitemMoreThan4 > 0 {
+			for i := 0; i < theSpitemMoreThan4; i++ {
+				f.DuplicateRow("SP", 40)
+			}
+		}
 		for i := 0; i < len(readPiContent.Body.Sp.SpItems); i++ {
 			SpitemToManufactureNum[i] = decideManufactureToSpItem(readPiContent.Body.Sp.SpItems[i].SupplierName)
 
 		}
 		//var howManyManufacture int = len(readPiContent.Body.Sp.SpItems)
 
-		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
 		//***************************************明確位置表格
 
 		//台灣進口--sales Term
@@ -591,7 +597,12 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 
 	} else if excelOrPdf == "pdf" {
 		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
-
+		theSpitemMoreThan4 := howManySpItem - 4
+		if theSpitemMoreThan4 > 0 {
+			for i := 0; i < theSpitemMoreThan4; i++ {
+				f.DuplicateRow("SP", 40)
+			}
+		}
 		//三角貿易--廠商
 		var manufacturerOrderArray [6]string
 		for i := 0; i < 5; i++ {
@@ -621,7 +632,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		//中下的關鍵表格
-		var doubleArrayPiTerms [26][6]string
+		var doubleArrayPiTerms [26][100]string
 		for i := 0; i < 25; i++ {
 			for j := 0; j < howManySpItem; j++ {
 				doubleArrayPiTerms[i][j], _ = excelize.CoordinatesToCellName(1+i, 37+j)
@@ -755,13 +766,13 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 
 		//鋼捲成本
-		var ironArray [5]float64
+		var ironArray [100]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			ironArray[i] = n.Price + n.ThiPremium + n.CostOfImport
 			f.SetCellValue("SP", doubleArrayPiTerms[10][0+i], ironArray[i])
 		}
 		// 加工費總計
-		var fabricatorArray [5]float64
+		var fabricatorArray [100]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
 
 			fabricatorArray[i] = n.Non5Mt + n.Slinging + n.Sticker + n.Rpcb
@@ -795,20 +806,20 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			f.SetCellValue("SP", doubleArrayPiTerms[15][0+i], averageExportFee)
 		}
 		//毛利
-		var grossProfit [5]float64
+		var grossProfit [100]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			grossProfit[i] = n.UnitPrice - ironArray[i] - n.FobFee - n.Commission - n.RemainLoss - fabricatorArray[i] - totalExportAndBankFee
 
 			f.SetCellValue("SP", doubleArrayPiTerms[16][0+i], grossProfit[i])
 		}
 		//毛利總計
-		var totalGrossProfit [5]float64
+		var totalGrossProfit [100]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			totalGrossProfit[i] = grossProfit[i] * n.Quantity / 1000 * readPiContent.Body.Sp.Rate
 			f.SetCellValue("SP", doubleArrayPiTerms[19][0+i], totalGrossProfit[i])
 		}
 		//採購價
-		var buyingPrice [5]float64
+		var buyingPrice [100]float64
 		for i, n := range readPiContent.Body.Sp.SpItems {
 			buyingPrice[i] = (ironArray[i] + fabricatorArray[i]) - n.CostOfImport
 			f.SetCellValue("SP", doubleArrayPiTerms[24][0+i], buyingPrice[i])
@@ -821,7 +832,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			E19ToE23[i], _ = excelize.CoordinatesToCellName(5, 19+i)
 		}
 
-		var E19ToE23Amount [5]float64
+		var E19ToE23Amount [100]float64
 		for i := 0; i < 5; i++ {
 			for j, n := range readPiContent.Body.Sp.SpItems {
 				if SpitemToManufactureNum[j] == i {
@@ -831,22 +842,23 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 			f.SetCellValue("SP", E19ToE23[i], E19ToE23Amount[i]/1000)
 		}
 
-		//////////////////////////////////////////////////////////////////////////////////////回頭做E19~E23的數量
 		//總價 (USD)
 		var H19ToH23 [5]string
 		for i := 0; i < 5; i++ {
 			H19ToH23[i], _ = excelize.CoordinatesToCellName(8, 19+i)
 		}
 
-		var H19ToH23supply [5]float64  //出貨成本計算
-		var H19ToH23Procing [5]float64 //加工成本計算
+		var H19ToH23supply [100]float64  //出貨成本計算
+		var H19ToH23Procing [100]float64 //加工成本計算
 		for i := 0; i < 5; i++ {
 			for j, n := range readPiContent.Body.Sp.SpItems {
 				if SpitemToManufactureNum[j] == i {
-					H19ToH23supply[i] += (n.Price + n.ThiPremium) * n.Quantity / 1000
-					H19ToH23Procing[i] += fabricatorArray[i] * n.Quantity / 1000
+					H19ToH23supply[i] += Round((n.Price+n.ThiPremium)*n.Quantity/1000, 1)
+					H19ToH23Procing[i] += Round(fabricatorArray[j]*n.Quantity/1000, 1)
 				}
+				fmt.Println("H19ToH23Procing", H19ToH23Procing[i])
 			}
+
 			f.SetCellValue("SP", H19ToH23[i], H19ToH23supply[i]+H19ToH23Procing[i])
 		}
 		//數量 (MT)
@@ -862,7 +874,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		for i := 0; i < 5; i++ {
 			S19ToS23[i], _ = excelize.CoordinatesToCellName(19, 19+i)
 		}
-		var S19ToS23TotalPrice [5]float64
+		var S19ToS23TotalPrice [100]float64
 		for i := 0; i < 5; i++ {
 			for j, n := range readPiContent.Body.Sp.SpItems {
 				if SpitemToManufactureNum[j] == i {
@@ -889,23 +901,19 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		for i := 0; i < 5; i++ {
 			totalPriceT24 += S19ToS23TotalPrice[i]
 		}
-		f.SetCellValue("SP", "T24", totalPriceT24)
 
-		f.SetCellValue("SP", "I24", totalPrice)
-		//P24數量 (MT)
-		f.SetCellValue("SP", "P24", totalAmount)
-		//S24總價 (USD)
-		totalManufactureSell := 0.0
-		for i := 0; i < 5; i++ {
-			totalManufactureSell += S19ToS23TotalPrice[i]
-		}
+		f.SetCellValue("SP", "T24", totalPriceT24) //T24總價 (USD) 總和
+
+		f.SetCellValue("SP", "I24", totalPrice) //P24數量 (MT)
+
+		f.SetCellValue("SP", "P24", totalAmount) //S24總價 (USD)
+
 		//鋼捲成本(盤價＋厚度＋進口)
 		H27IronCost := 0.0
 
 		for _, n := range readPiContent.Body.Sp.SpItems {
 
 			H27IronCost += Round((n.Price+n.ThiPremium)*n.Quantity/1000, 1)
-			fmt.Println(H27IronCost)
 
 		}
 		f.SetCellValue("SP", "H27", H27IronCost)
@@ -961,8 +969,20 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		f.SetCellValue("SP", "X31", readPiContent.Body.Sp.Rate)
 
 		//預估利潤(USD)在一開始
+		predictProfit := 0.0
+		predictProfit = totalPriceT24 - totalPrice - H29LosingOther - S27BankFee - exprotTtl/readPiContent.Body.Sp.Rate - readPiContent.Body.Sp.SpItems[0].Commission*totalExportWeight/1000 - S30ExInportFee - readPiContent.Body.Sp.FeeDetail.Other
+		f.SetCellValue("SP", "E4", predictProfit)
 
+		//毛利率
+		f.SetCellValue("SP", "E5", predictProfit/totalPriceT24)
 		//刪除欄
+		for i := 0; i < 26; i++ {
+			f.RemoveCol("SP", "Z")
+		}
+
+		for i := 0; i < 16; i++ {
+			f.RemoveRow("SP", 43+theSpitemMoreThan4)
+		}
 
 		//存檔
 
