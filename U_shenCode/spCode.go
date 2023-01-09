@@ -2,11 +2,29 @@ package build_file
 
 import (
 	"fmt"
+	"math"
 	"strconv"
+
 	orderModel "eirc.app/internal/v1/structure/order"
 
 	"github.com/xuri/excelize/v2"
 )
+
+func Round(x, unit float64) float64 {
+	return math.Round(x/unit) * unit
+}
+
+func decideManufactureToSpItem(income string, readPiSpContent orderModel.PiSp_content) int {
+
+	tempReturn := 0
+	manufacureNum := len(readPiSpContent.Sp.ManufacturerOrder)
+	for i := 0; i < manufacureNum; i++ {
+		if income == readPiSpContent.Body.Sp.ManufacturerOrder[i].Manufacturer.Name {
+			tempReturn = i
+		}
+	}
+	return tempReturn
+}
 
 func BuildSp(outputName string, readPiSpContent orderModel.PiSp_content) (filePath string) {
 
@@ -20,7 +38,6 @@ func BuildSp(outputName string, readPiSpContent orderModel.PiSp_content) (filePa
 			fmt.Println(err)
 		}
 	}()
-
 
 	//manuOrderCount :=len(readPiSpContent.Sp.ManufacturerOrder)
 	var howManyManufacture int = len(readPiSpContent.Sp.ManufacturerOrder)
@@ -389,8 +406,8 @@ func BuildSp(outputName string, readPiSpContent orderModel.PiSp_content) (filePa
 	f.SetCellValue("SP", "T7", readPiSpContent.Sp.PortOfDischarge)                 //卸貨港
 	f.SetCellValue("SP", "T10", readPiSpContent.Sp.ContractId)                     //合約號:
 	f.SetCellValue("SP", "T14", readPiSpContent.Sp.PaymentTerm)                    //Payment Term:
-	f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30")                  //預估利潤(USD)設定
-	f.SetCellFormula("SP", "E5", "=E4/T24")                                           //毛利率設定
+	f.SetCellFormula("SP", "E4", "=T24-I24-S27-S28-S29-S30-H29-H30")               //預估利潤(USD)設定
+	f.SetCellFormula("SP", "E5", "=E4/T24")                                        //毛利率設定
 
 	//數量 (MT)計算
 	for i := 0; i < 5; i++ {
