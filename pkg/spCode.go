@@ -490,6 +490,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		//鋼捲成本
 		for i := range readPiContent.Body.Sp.SpItems {
 			f.SetCellFormula("SP", K37ToK40[i], "="+H37ToH40[i]+"+"+I37ToI40[i]+"+"+J37ToJ40[i]+"")
+			//
 		}
 		// 加工費總計
 		for i := range readPiContent.Body.Sp.SpItems {

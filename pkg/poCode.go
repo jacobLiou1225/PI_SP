@@ -89,6 +89,25 @@ func CheckContainer(n []interface{}) string {
 
 }
 
+func testfunc(n []interface{}) string {
+
+	fmt.Println("METHOD 1")
+	temp_ans := ""
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		if strings.Contains(valStr, "100") {
+			temp_ans = "■100 Micro Laser PE, □80 Micro PE, □70 Micro PE□50 Micro PE"
+		} else if strings.Contains(valStr, "80") {
+			temp_ans = "□100 Micro Laser PE, ■80 Micro PE, □70 Micro PE□50 Micro PE"
+		} else if strings.Contains(valStr, "70") {
+			temp_ans = "□100 Micro Laser PE, □80 Micro PE, ■70 Micro PE□50 Micro PE"
+		} else {
+			temp_ans = "□100 Micro Laser PE, □80 Micro PE, □70 Micro PE■50 Micro PE"
+		}
+	}
+	return temp_ans
+}
+
 type poJson struct {
 	Code      int       `json:"code"`
 	Timestamp time.Time `json:"timestamp"`
