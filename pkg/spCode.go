@@ -15,7 +15,7 @@ func Round(x, unit float64) float64 {
 	return math.Round(x/unit) * unit
 }
 func decideManufactureToSpItem(income string) int {
-	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/b4e71c02-ed05-4a7c-bdfe-132b1d36800f")
+	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/badfbe15-3be3-45a9-9250-5a71a8216d25")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -50,7 +50,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 	}()
 
-	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/b4e71c02-ed05-4a7c-bdfe-132b1d36800f")
+	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/badfbe15-3be3-45a9-9250-5a71a8216d25")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -73,6 +73,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 	f.SetCellValue("SP", "T7", readPiContent.Body.Sp.PortOfDischarge) //卸貨港
 	f.SetCellValue("SP", "T10", readPiContent.Body.Sp.ContractID)     //合約號:
 	f.SetCellValue("SP", "T14", readPiContent.Body.Sp.PaymentTerm)    //Payment Term:
+	fmt.Println("contract", readPiContent.Body.Sp.ContractID)
 
 	if excelOrPdf == "excel" {
 		//spitem的加工廠編號
@@ -731,7 +732,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		}
 		for i, n := range readPiContent.Body.Sp.ManufacturerOrder {
 
-			f.SetCellValue("SP", TWImportSalesTerm[i+1], n.PaymentTerm) //在(H,9)放入n.SalesTerm
+			f.SetCellValue("SP", TWImportSalesTerm[i], n.PaymentTerm) //在(H,9)放入n.SalesTerm
 
 		}
 

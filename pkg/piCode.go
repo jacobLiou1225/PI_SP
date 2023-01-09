@@ -12,7 +12,7 @@ import (
 )
 
 // formal顯示
-
+// Read_Pi_content
 type Read_Pi_content struct {
 	Code      int       `json:"code"`
 	Timestamp time.Time `json:"timestamp"`
@@ -59,7 +59,7 @@ type Read_Pi_content struct {
 				Size      string  `json:"size"`
 				Quantity  float64 `json:"quantity"`
 				UnitPrice float64 `json:"unit_price"`
-				Amount    int     `json:"amount"`
+				Amount    float64 `json:"amount"`
 			} `json:"PiItems"`
 			RemittanceBeneficiaryInfo struct {
 				BeneID     string `json:"bene_id"`
@@ -172,6 +172,10 @@ type Read_Pi_content struct {
 					Quantity float64 `json:"quantity"`
 					Total    float64 `json:"total"`
 				} `json:"SupplierRevenue"`
+				SupplierFabricatorCostQuantity float64 `json:"supplier_fabricator_cost_quantity"`
+				SupplierFabricatorCostAmount   float64 `json:"supplier_fabricator_cost_amount"`
+				SupplierRevenueQuantity        float64 `json:"supplier_revenue_quantity"`
+				SupplierRevenueAmount          float64 `json:"supplier_revenue_amount"`
 			} `json:"ManufacturerFee"`
 			ManufacturerOrder []struct {
 				ManuOrderID    string `json:"manu_order_id"`
@@ -205,7 +209,7 @@ func BuildPi(outputName string) (filePath string) {
 		}
 	}()
 
-	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/b4e71c02-ed05-4a7c-bdfe-132b1d36800f")
+	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/order/pisp/badfbe15-3be3-45a9-9250-5a71a8216d25")
 	if err != nil {
 		fmt.Println(err)
 		return

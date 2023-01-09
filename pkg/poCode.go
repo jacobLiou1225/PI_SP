@@ -189,7 +189,7 @@ func BuildPo(outputName string) (filePath string) {
 		}
 	}()
 
-	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/purchase-order/e7dbc0b1-b7a9-4f71-8f5e-b556294a9518")
+	res, err := http.Get("https://api.testing.eirc.app/meglobe/v1.0/purchase-order/843fb5ca-fe4b-4d61-bb28-711ef64212b0")
 	if err != nil {
 		fmt.Println(err)
 		return

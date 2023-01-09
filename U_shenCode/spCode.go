@@ -704,7 +704,7 @@ func BuildSp(outputName string, readPiSpContent orderModel.PiSp_content, excelOr
 		}
 		for i, n := range readPiSpContent.Body.Sp.ManufacturerOrder {
 
-			f.SetCellValue("SP", TWImportSalesTerm[i+1], n.PaymentTerm) //在(H,9)放入n.SalesTerm
+			f.SetCellValue("SP", TWImportSalesTerm[i], n.PaymentTerm) //在(H,9)放入n.SalesTerm
 
 		}
 
