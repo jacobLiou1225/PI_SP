@@ -19,7 +19,9 @@ func countPoLine(i string) int {
 	return (len(i) / 55)
 }
 
-func CheckBuy(n []interface{}) string {
+func CheckBuy(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -33,7 +35,10 @@ func CheckBuy(n []interface{}) string {
 	}
 	return temp_ans
 }
-func CheckHeavy(n []interface{}) string {
+
+func CheckHeavy(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -49,7 +54,9 @@ func CheckHeavy(n []interface{}) string {
 
 }
 
-func CheckDirection(n []interface{}) string {
+func CheckDirection(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -63,7 +70,9 @@ func CheckDirection(n []interface{}) string {
 
 }
 
-func CheckPoliFilm(n []interface{}) string {
+func CheckPoliFilm(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -77,7 +86,9 @@ func CheckPoliFilm(n []interface{}) string {
 
 }
 
-func CheckNovacel(n []interface{}) string {
+func CheckNovacel(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -90,7 +101,9 @@ func CheckNovacel(n []interface{}) string {
 	return temp_ans
 
 }
-func CheckBlueBlack(n []interface{}) string {
+func CheckBlueBlack(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -102,7 +115,9 @@ func CheckBlueBlack(n []interface{}) string {
 	}
 	return temp_ans
 }
-func CheckDiameter(n []interface{}) string {
+func CheckDiameter(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -117,7 +132,9 @@ func CheckDiameter(n []interface{}) string {
 	return temp_ans
 }
 
-func CheckNational(n []interface{}) string {
+func CheckNational(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -129,7 +146,9 @@ func CheckNational(n []interface{}) string {
 	}
 	return temp_ans
 }
-func CheckContainer(n []interface{}) string {
+func CheckContainer(n []struct {
+	Type string "json:\"type\""
+}) string {
 
 	fmt.Println("CheckContainer")
 	temp_ans := ""
@@ -144,7 +163,9 @@ func CheckContainer(n []interface{}) string {
 	return temp_ans
 }
 
-func CheckMicroLaser(n []interface{}) string {
+func CheckMicroLaser(n []struct {
+	Type string "json:\"type\""
+}) string {
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -161,7 +182,9 @@ func CheckMicroLaser(n []interface{}) string {
 	return temp_ans
 }
 
-func CheckWeight(n []interface{}) string {
+func CheckWeight(n []struct {
+	Type string "json:\"type\""
+}) string {
 
 	temp_ans := ""
 	for _, v := range n {
@@ -249,22 +272,30 @@ type poJson struct {
 			Size           string  `json:"size"`
 			Quantity       float64 `json:"quantity"`
 		} `json:"OriginalCoil"`
-		BackingPaper []interface {
+		BackingPaper []struct {
+			Type string `json:"type"`
 		} `json:"backing_paper"`
-		Sticker []interface {
+		Sticker []struct {
+			Type string `json:"type"`
 		} `json:"sticker"`
-		Packing []interface {
+		Packing []struct {
+			Type string `json:"type"`
 		} `json:"packing"`
-		WeightPerPiece []interface {
+		WeightPerPiece []struct {
+			Type string `json:"type"`
 		} `json:"weight_per_piece"`
-		SprayWord []interface {
+		SprayWord []struct {
+			Type string `json:"type"`
 		} `json:"spray_word"`
-		Diameter []interface {
+		Diameter []struct {
+			Type string `json:"type"`
 		} `json:"diameter"`
-		Pallet []interface {
+		Pallet []struct {
+			Type string `json:"type"`
 		} `json:"pallet"`
 		ShippingMark        []interface{} `json:"shipping_mark"`
-		DirectionOfEntrance []interface {
+		DirectionOfEntrance []struct {
+			Type string `json:"type"`
 		} `json:"direction_of_entrance"`
 	} `json:"body"`
 }
@@ -464,7 +495,7 @@ func BuildPo(outputName string) (filePath string) {
 	packing := CheckContainer(readPoContent.Body.Packing)
 	f.SetCellValue("PO", C18ToC33[4], packing)
 	//4. 單件重量:
-	weight_per_piece := "卷: Max. " + strconv.FormatFloat(readPoContent.Body.CoilWeight, 'f', 2, 64) + "MT 版: Max. " + strconv.FormatFloat(readPoContent.Body.PlateWeight, 'f', 2, 64) + "MT" + " " + CheckWeight(readPoContent.Body.WeightPerPiece)
+	weight_per_piece := "卷: Max. " + strconv.FormatFloat(readPoContent.Body.CoilWeight, 'f', 1, 64) + "MT 版: Max. " + strconv.FormatFloat(readPoContent.Body.PlateWeight, 'f', 1, 64) + "MT" + " " + CheckWeight(readPoContent.Body.WeightPerPiece)
 	f.SetCellValue("PO", C18ToC33[5], weight_per_piece)
 	//5. 噴字:
 	spray_word := CheckBuy(readPoContent.Body.SprayWord) + " (GRADE/ FINISH/ THEORETICAL THICKNESS/ WIDTH/ LENGTH/ COIL NO.)"
