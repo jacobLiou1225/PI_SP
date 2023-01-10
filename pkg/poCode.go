@@ -11,50 +11,78 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func CheckBuy(n interface{}) string {
-	interfaceString := n.(string)
-	if strings.Contains(interfaceString, "需要") {
-		return "■需要□不需要"
-	} else {
-		return "□需要■不需要"
+func CheckBuy(n []interface{}) string {
+	fmt.Println("CheckContainer")
+	temp_ans := ""
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		if strings.Contains(valStr, "不需要") {
+			temp_ans = "□需要■不需要"
+		} else {
+			temp_ans = "■需要□不需要"
+		}
 	}
+	return temp_ans
 }
-func CheckHeavy(n interface{}) string {
-	interfaceString := n.(string)
-	if strings.Contains(interfaceString, "扣重") {
-		return "■扣重□不扣重"
-	} else {
-		return "□扣重■不扣重"
+func CheckHeavy(n []interface{}) string {
+	fmt.Println("CheckContainer")
+	temp_ans := ""
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		if strings.Contains(valStr, "不扣重") {
+			temp_ans = "□扣重■不扣重"
+		} else {
+			temp_ans = "■扣重□不扣重"
+		}
 	}
+	return temp_ans
+
 }
 
-func CheckpoliFilm(n interface{}) string {
-	interfaceString := n.(string)
-	if strings.Contains(interfaceString, "POLI-FILM") {
-		return "■POLI-FILM"
-	} else {
-		return "□POLI-FILM"
+func CheckPoliFilm(n []interface{}) string {
+
+	fmt.Println("CheckContainer")
+	temp_ans := ""
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		if strings.Contains(valStr, "POLI-FILM") {
+			temp_ans = "■POLI-FILM"
+		} else {
+			temp_ans = "□POLI-FILM"
+		}
 	}
+	return temp_ans
+
 }
 
-func CheckNovacel(n interface{}) string {
-	interfaceString := n.(string)
-	if strings.Contains(interfaceString, "NOVACEL") {
-		return "■NOVACEL"
-	} else {
-		return "□NOVACEL"
+func CheckNovacel(n []interface{}) string {
+	fmt.Println("NOVACEL")
+	temp_ans := ""
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		if strings.Contains(valStr, "POLI-FILM") {
+			temp_ans = "■NOVACEL"
+		} else {
+			temp_ans = "□NOVACEL"
+		}
 	}
+	return temp_ans
+
 }
-func CheckBlueBlack(n interface{}) string {
-	interfaceString := n.(string)
-	if strings.Contains(interfaceString, "黑白") {
-		return "□藍色■黑白"
-	} else {
-		return "■藍色□黑白"
+func CheckBlueBlack(n []interface{}) string {
+	temp_ans := ""
+	for _, v := range n {
+		valStr := fmt.Sprint(v)
+		if strings.Contains(valStr, "黑白") {
+			temp_ans = "□藍色■黑白"
+		} else {
+			temp_ans = "■藍色□黑白"
+		}
 	}
+	return temp_ans
 }
 
-func CheckMicroLaser(n interface{}) string {
+/*func CheckMicroLaser(n interface{}) string {
 	interfaceString := n.(string)
 	if strings.Contains(interfaceString, "100") {
 		return "■100 Micro Laser PE, □80 Micro PE, □70 Micro PE□50 Micro PE"
@@ -66,32 +94,26 @@ func CheckMicroLaser(n interface{}) string {
 		return "□100 Micro Laser PE, □80 Micro PE, □70 Micro PE■50 Micro PE"
 	}
 
-}
+}*/
 
 func CheckContainer(n []interface{}) string {
-	var boolMidel bool
+
+	fmt.Println("CheckContainer")
+	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
-		fmt.Println(valStr)
-		interfaceString := v.(string)
-		if strings.Contains(interfaceString, "中性") {
-			boolMidel = true
-
+		if strings.Contains(valStr, "中性") {
+			temp_ans = "■中性包裝 □標準外銷包裝"
 		} else {
-			boolMidel = false
+			temp_ans = "□中性包裝 ■標準外銷包裝 "
 		}
 	}
-	if boolMidel == true {
-		return "■中性包裝 □標準外銷包裝"
-	} else {
-		return "□中性包裝 ■標準外銷包裝 "
-	}
-
+	return temp_ans
 }
 
-func testfunc(n []interface{}) string {
+func CheckMicroLaser(n []interface{}) string {
 
-	fmt.Println("METHOD 1")
+	fmt.Println("CheckContainer")
 	temp_ans := ""
 	for _, v := range n {
 		valStr := fmt.Sprint(v)
@@ -201,25 +223,31 @@ func BuildPo(outputName string) (filePath string) {
 		fmt.Println(err)
 		return
 	}
-	var readPiContent poJson
-	json.Unmarshal(body, &readPiContent)
+	var readPoContent poJson
+	json.Unmarshal(body, &readPoContent)
 	//開始的表格 寫死內容
-	f.SetCellValue("PO", "B3", readPiContent.Body.Order.Tel)
-	f.SetCellValue("PO", "C7", readPiContent.Body.Attention)
-	f.SetCellValue("PO", "C8", readPiContent.Body.OrdFrom)
-	f.SetCellValue("PO", "H7", readPiContent.Body.ExpectDate)
-	f.SetCellValue("PO", "H8", readPiContent.Body.Order.ContractID)
-	f.SetCellValue("PO", "H9", readPiContent.Body.OrdNum)
+	f.SetCellValue("PO", "B3", readPoContent.Body.Order.Tel)
+	f.SetCellValue("PO", "C7", readPoContent.Body.Attention)
+	f.SetCellValue("PO", "C8", readPoContent.Body.OrdFrom)
+	f.SetCellValue("PO", "H7", readPoContent.Body.ExpectDate)
+	f.SetCellValue("PO", "H8", readPoContent.Body.Order.ContractID)
+	f.SetCellValue("PO", "H9", readPoContent.Body.OrdNum)
 	f.SetCellFormula("PO", "C9", "=H7+45")
 
 	//插入row數
-	poItemLength := len(readPiContent.Body.PoItems)
-	fmt.Println(poItemLength)
-	if poItemLength > 4 {
-		for i := 0; i < poItemLength-4; i++ {
-			f.DuplicateRowTo("PO", 13, 14+i)
+	poItemLength := len(readPoContent.Body.PoItems)
+	theInsertRow := 0
+	if poItemLength-4 > 0 {
+		theInsertRow = poItemLength - 4
+		for i := 0; i < theInsertRow; i++ {
+			f.DuplicateRow("PO", 13)
 		}
 
+	}
+	// 1.襯紙~15. 特殊要求位置設定
+	var C18ToC33 [15]string
+	for i := 0; i < 15; i++ {
+		C18ToC33[i], _ = excelize.CoordinatesToCellName(3, 18+theInsertRow)
 	}
 	//編號設定
 	var NumerOfArray [10]string
@@ -238,7 +266,7 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", IronOfArray[i], readPiContent.Body.PoItems[i].Grade)
+		f.SetCellValue("PO", IronOfArray[i], readPoContent.Body.PoItems[i].Grade)
 	}
 
 	//S/M設定
@@ -248,7 +276,7 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", SMOfArray[i], readPiContent.Body.PoItems[i].Edge)
+		f.SetCellValue("PO", SMOfArray[i], readPoContent.Body.PoItems[i].Edge)
 	}
 
 	//Size設定
@@ -258,7 +286,7 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", sizeArray[i], readPiContent.Body.PoItems[i].Size)
+		f.SetCellValue("PO", sizeArray[i], readPoContent.Body.PoItems[i].Size)
 	}
 
 	//訂單重量設定
@@ -268,7 +296,7 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", weightOfArray[i], readPiContent.Body.PoItems[i].Quantity)
+		f.SetCellValue("PO", weightOfArray[i], readPoContent.Body.PoItems[i].Quantity)
 	}
 
 	//FOB設定
@@ -278,7 +306,7 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", FOBOfArray[i], readPiContent.Body.PoItems[i].FobFoshan)
+		f.SetCellValue("PO", FOBOfArray[i], readPoContent.Body.PoItems[i].FobFoshan)
 	}
 	//總額(USD)
 	var H12TOHXX [10]string
@@ -305,7 +333,7 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", productPriceOfArray[i], readPiContent.Body.PoItems[i].FinishedPrice)
+		f.SetCellValue("PO", productPriceOfArray[i], readPoContent.Body.PoItems[i].FinishedPrice)
 	}
 
 	//備註
@@ -315,13 +343,16 @@ func BuildPo(outputName string) (filePath string) {
 	}
 
 	for i := 0; i < poItemLength; i++ {
-		f.SetCellValue("PO", RemarkOfArray[i], readPiContent.Body.PoItems[i].Remark)
+		f.SetCellValue("PO", RemarkOfArray[i], readPoContent.Body.PoItems[i].Remark)
 	}
 
 	//訂單重量(MT) total
 	f.SetCellFormula("PO", "F16", "=SUM(F12:F15)")
 	//總額(USD) total
 	f.SetCellFormula("PO", "H16", "=SUM(H12:H15)")
+	//1. 襯紙:
+	backing_paper := CheckHeavy(readPoContent.Body.BackingPaper) + "; " + CheckBuy(readPoContent.Body.BackingPaper)
+	f.SetCellValue("PO", C18ToC33[0], backing_paper)
 
 	//存檔
 	if err := f.SaveAs(outputName + ".xlsx"); err != nil {

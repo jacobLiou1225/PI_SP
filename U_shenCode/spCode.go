@@ -53,8 +53,8 @@ func BuildSp(outputName string, readPiSpContent orderModel.PiSp_content, excelOr
 		var SpitemToManufactureNum [50]int
 		var howManySpItem int = len(readPiSpContent.Body.Sp.SpItems)
 		theSpitemMoreThan4 := 0
-		if theSpitemMoreThan4 > 0 {
-			theSpitemMoreThan4 -= 4
+		if howManySpItem-4 > 0 {
+			theSpitemMoreThan4 = howManySpItem - 4
 			for i := 0; i < theSpitemMoreThan4; i++ {
 				f.DuplicateRow("SP", 40)
 			}

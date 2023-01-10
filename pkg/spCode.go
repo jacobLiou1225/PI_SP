@@ -80,7 +80,7 @@ func BuildSp(outputName string, excelOrPdf string) (filePath string) {
 		var SpitemToManufactureNum [50]int
 		var howManySpItem int = len(readPiContent.Body.Sp.SpItems)
 		theSpitemMoreThan4 := 0
-		if theSpitemMoreThan4 > 0 {
+		if theSpitemMoreThan4-4 > 0 {
 			theSpitemMoreThan4 -= 4
 			for i := 0; i < theSpitemMoreThan4; i++ {
 				f.DuplicateRow("SP", 40)
